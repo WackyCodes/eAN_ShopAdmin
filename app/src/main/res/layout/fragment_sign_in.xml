@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/sign_in_frameLayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".launching.SignInFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/colorWhite"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/scrollView2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:layout_gravity="center"
+                    android:layout_height="60dp"
+                    android:layout_marginTop="80dp"
+                    app:srcCompat="@mipmap/logo" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:gravity="center"
+                    android:textAlignment="center"
+                    android:padding="8dp"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:fontFamily="serif"
+                    android:text="Shop Admin"
+                    android:textColor="@color/colorSecondary" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:orientation="vertical">
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp">
+
+                        <EditText
+                            android:id="@+id/sign_in_shop_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/back_no_back_color_1dp_border"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:drawableLeft="@drawable/ic_store_black_24dp"
+                            android:drawablePadding="8dp"
+                            android:drawableTint="@color/colorPrimary"
+                            android:ems="10"
+                            android:hint="Enter Shop ID"
+                            android:inputType="number"
+                            android:padding="8dp"
+                            android:maxLength="9"
+                            android:singleLine="true"
+                            android:maxLines="1"
+                            android:textColor="@color/colorSecondary"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/verify_shop_image"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"
+                            android:layout_marginRight="4dp"
+                            android:elevation="4dp"
+                            android:tint="@color/colorGreen"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="@+id/sign_in_shop_id"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:srcCompat="@drawable/ic_check_black_24dp" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <EditText
+                        android:id="@+id/sign_in_mobile"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginRight="16dp"
+                        android:background="@drawable/back_no_back_color_1dp_border"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:drawableLeft="@drawable/ic_phone_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/colorPrimary"
+                        android:ems="10"
+                        android:hint="Enter Mobile"
+                        android:inputType="number"
+                        android:padding="8dp"
+                        android:maxLength="10"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:textColor="@color/colorSecondary" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:padding="8dp"
+                        android:text="To Reset Password Enter Your email "
+                        android:textColor="@color/colorSecondary" />
+
+                    <EditText
+                        android:id="@+id/sign_in_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:background="@drawable/back_no_back_color_1dp_border"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:drawableLeft="@drawable/ic_email_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/colorPrimary"
+                        android:ems="10"
+                        android:hint="Enter Email"
+                        android:inputType="textEmailAddress"
+                        android:padding="8dp"
+                        android:textColor="@color/colorSecondary" />
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/sign_in_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginRight="32dp"
+                    android:background="@drawable/back_no_back_color_1dp_border"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:drawableLeft="@drawable/ic_lock_black_24dp"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="@color/colorPrimary"
+                    android:ems="10"
+                    android:hint="Enter Password"
+                    android:inputType="textPassword"
+                    android:padding="8dp"
+                    android:singleLine="true"
+                    android:maxLines="1"
+                    android:textColor="@color/colorSecondary" />
+                <TextView
+                    android:id="@+id/sign_in_forget_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:padding="8dp"
+                    android:text="Forget Password ..?"
+                    android:textColor="@color/colorSecondary" />
+
+                <LinearLayout
+                    android:id="@+id/create_pass_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:padding="8dp"
+                        android:text="Create Password "
+                        android:textColor="@color/colorSecondary" />
+                    <EditText
+                        android:id="@+id/sign_up_password_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:background="@drawable/back_no_back_color_1dp_border"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:drawableLeft="@drawable/ic_lock_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/colorPrimary"
+                        android:ems="10"
+                        android:hint="Enter Password"
+                        android:inputType="textPassword"
+                        android:padding="8dp"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:textColor="@color/colorSecondary" />
+                    <EditText
+                        android:id="@+id/sign_up_password_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:background="@drawable/back_no_back_color_1dp_border"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:drawableLeft="@drawable/ic_lock_black_24dp"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/colorPrimary"
+                        android:ems="10"
+                        android:hint="Enter Password"
+                        android:inputType="textPassword"
+                        android:padding="8dp"
+                        android:singleLine="true"
+                        android:maxLines="1"
+                        android:textColor="@color/colorSecondary" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/sign_in_up_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginTop="60dp"
+                    android:layout_marginBottom="30dp"
+                    android:layout_marginEnd="32dp"
+                    android:layout_marginRight="32dp"
+                    android:background="@drawable/back_1dp_border_4dp_radius"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:padding="8dp"
+                    android:text="Sign In"
+                    android:textColor="@color/colorWhite" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>
