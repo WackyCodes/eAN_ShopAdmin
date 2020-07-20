@@ -10,9 +10,12 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -47,7 +50,11 @@ import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,17 +63,25 @@ import java.util.List;
 import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.StaticMethods;
+import wackycodes.ecom.eanshopadmin.other.UpdateImages;
+import wackycodes.ecom.eanshopadmin.product.ProductModel;
+import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
 
+import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GALLERY_CODE;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_EGG;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_NON_VEG;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_VEG;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_OTHERS;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.READ_EXTERNAL_MEMORY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_NAME;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_TYPE_VEG;
 
 public class AddNewProductActivity extends AppCompatActivity {
-
-
 
     private final int MRP_CHANGED = 10;
     private final int SELLING_CHANGED = 11;
@@ -92,8 +107,7 @@ public class AddNewProductActivity extends AppCompatActivity {
     public static List <String> productImageSelectList;
     public static List<UploadImageDataModel> uploadImageDataModelList;
 
-    public ArrayAdapter <String> dataAdapter;
-
+//    public ArrayAdapter <String> dataAdapter ;
     //            <!-- Section 2: Add Information...-->
     private LinearLayout secAddInfoLayout; // sec_2_add_info_layout
     private EditText newProFullName; // new_pro_full_name
@@ -106,7 +120,8 @@ public class AddNewProductActivity extends AppCompatActivity {
     private EditText newProStockAvailable; // new_pro_stock_available
     private Spinner newProQtyTypeText;
     private EditText newProVersionWeight; // new_pro_version_weight_et
-    private Switch newProCodSwitch; // new_pro_cod_switch
+    private Switch newProCodSwitch; // new_pro_cod_switch\
+    private Spinner newProVeganMark; // new_pro_veg_non_type
 
     //            <!-- Section 3: Add Descriptions and Specifications...-->
 //    private LinearLayout secAddDesSpecifyLayout; // sec_3_add_des_specific_layout
@@ -137,6 +152,7 @@ public class AddNewProductActivity extends AppCompatActivity {
     private int tempVal = 0;
     private int tempVal2 = 0;
     private String tempStrVal;
+    private int productLabelVeganMark = 0;
 //    private String mainImageLink = null;
     private boolean isUploadImages = false;
     private String uploadProductID;
@@ -150,7 +166,6 @@ public class AddNewProductActivity extends AppCompatActivity {
     private boolean isUpdateRequest = false;
 
     // ----------------*** OnCreate Method ***------------------------------------------------------
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
@@ -160,7 +175,7 @@ public class AddNewProductActivity extends AppCompatActivity {
 
 
 //        uploadProductID = getIntent().getStringExtra( "PRODUCT_ID" );
-        productCat = getIntent().getStringExtra( "PRODUCT_CAT" );
+//        productCat = getIntent().getStringExtra( "PRODUCT_CAT" );
         catIndex = getIntent().getIntExtra( "CAT_INDEX", -1 );
         layIndex = getIntent().getIntExtra( "LAY_INDEX", -1 );
         isUpdateRequest = getIntent().getBooleanExtra( "UPDATE", false );
@@ -187,6 +202,7 @@ public class AddNewProductActivity extends AppCompatActivity {
         newProVersionWeight = findViewById( R.id.new_pro_version_weight_et );
         newProQtyTypeText = findViewById( R.id.new_pro_qty_type );
         newProCodSwitch = findViewById( R.id.new_pro_cod_switch );
+        newProVeganMark = findViewById( R.id.new_pro_veg_non_type );
 //            <!-- Section 3: Add Descriptions and Specifications...-->
 //        secAddDesSpecifyLayout = findViewById( R.id.sec_3_add_des_specific_layout );
 //        useTabLayoutSwitch = findViewById( R.id.new_pro_tab_layout_switch_sec_3 );
@@ -211,6 +227,7 @@ public class AddNewProductActivity extends AppCompatActivity {
         imgAdaptor = new AddImageAdaptor();
         productImageSelectList = new ArrayList <>();
         uploadImageDataModelList = new ArrayList <>();
+        productImageSelectList.add( "Select Image" );
 
         // Add Image Recycler....
         LinearLayoutManager imgLayoutManager = new LinearLayoutManager( this );
@@ -260,6 +277,7 @@ public class AddNewProductActivity extends AppCompatActivity {
 
         // ------------  Sec 2 -- Text Watcher...
         priceAndDiscountTextWatcher();
+        selectProductVegNoNType();
 
         // ----------  Search Tags...
         searchTagVisibleBtn.setOnClickListener( new View.OnClickListener() {
@@ -271,7 +289,7 @@ public class AddNewProductActivity extends AppCompatActivity {
                     searchTagVisibleBtn.setImageResource( R.drawable.ic_visibility_off_black_24dp );
                 }else{
                     if (tagString == null){
-                        updateTagList( "" );
+                        updateTagList( SHOP_ID );
                     }else
                         searchTagsText.setVisibility( View.VISIBLE );
                     searchTagVisibleBtn.setImageResource( R.drawable.ic_visibility_black_24dp );
@@ -279,7 +297,6 @@ public class AddNewProductActivity extends AppCompatActivity {
             }
         } );
 
-        searchTagAdd_Btn.setVisibility( View.VISIBLE );
         searchTagAdd_Btn.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -290,13 +307,24 @@ public class AddNewProductActivity extends AppCompatActivity {
             }
         } );
 
-        searchTagRemove_Btn.setVisibility( View.VISIBLE );
         searchTagRemove_Btn.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isNotEmptyEditText( searchTagEditText ) && tagString != null){
 //                    updateTagList(searchTagEditText.getText().toString());
-                    tagString.replaceAll( searchTagEditText.getText().toString().toLowerCase() + ", ", "" );
+                    String rmTag = searchTagEditText.getText().toString().toLowerCase();
+                    ArrayList<String> tempList = new ArrayList <>();
+                    tempList.addAll( Arrays.asList( tagString.split( ", " ) ) );
+                    tempList.remove( rmTag );
+                    tagString = String.valueOf( tempList );
+                    tagString = null;
+                    for (String s: tempList){
+                        if (tagString != null){
+                            tagString = tagString + s.trim() + ", ";
+                        }else{
+                            tagString = s.trim() + ", ";
+                        }
+                    }
                     searchTagsText.setText( tagString );
                     searchTagEditText.setText( "" );
                 }
@@ -309,11 +337,13 @@ public class AddNewProductActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.show();
-
                 if (isValidFieldsData()){
 //                    updateProduct(); // TODO: JOB..!
-                    getFinalTagList();
-                    createMapToUpload( uploadProductID );
+//                    getFinalTagList();
+                    updateTagList( SHOP_ID );
+                    createMapToUpload( uploadProductID, 1 );
+                }else{
+                    dialog.dismiss();
                 }
             }
         } );
@@ -340,6 +370,8 @@ public class AddNewProductActivity extends AppCompatActivity {
             return true;
         }
     }
+
+
     // Validation For section 2...
     private boolean isValidFieldsData()
     {
@@ -370,6 +402,10 @@ public class AddNewProductActivity extends AppCompatActivity {
                 DialogsClass.alertDialog( this, null, "Select Quantity Type..!" ).show();
                 return false;
             }
+            if (productLabelVeganMark == 0){
+                DialogsClass.alertDialog( this, null, "Select Product Label..!" ).show();
+                return false;
+            }
 
             if (isNotEmptyEditText(newProVersionWeight)){ // Finally....
                 return true;
@@ -387,40 +423,39 @@ public class AddNewProductActivity extends AppCompatActivity {
     // tag List...
     private void updateTagList(String tString){
 
-        if (tagString != null){
-            tString.replaceAll( "[^a-zA-Z0-9 ]", "" );
-
-            tagString = tagString + ", " + tString.toLowerCase().replaceAll( " ", ", " );
-            tagString = StaticMethods.removeDuplicate( tString );
-            searchTagsText.setText( tagString );
-        }else{
-            if (isNotEmptyEditText( newProFullName )){
-                tString = tString + " " + newProFullName.getText().toString();
-            }
-            if (isNotEmptyEditText( newProdShortName )){
-                tString = tString + " " + newProdShortName.getText().toString();
-            }
-
-            tString.replaceAll( "[^a-zA-Z0-9 ]", "" );
-
-            tString = tagString + SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + tString.toLowerCase().replaceAll( " ", ", " );
-
-            tagString = StaticMethods.removeDuplicate( tString );
-            searchTagsText.setText( tagString );
+        if (isNotEmptyEditText( newProFullName )){
+            tString = tString + " " + newProFullName.getText().toString();
         }
-//        newProSearchingTags.setText( tagString );
+        if (isNotEmptyEditText( newProdShortName )){
+            tString = tString + " " + newProdShortName.getText().toString();
+        }
+        tString.replaceAll( "[^a-zA-Z0-9]", "" );
+
+        if (tagString == null){
+            tString = SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", " + tString.toLowerCase().replaceAll( " ", ", " );
+        }else{
+            tString = tagString + ", "+ SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", "
+                    + tString.toLowerCase().replaceAll( " ", ", " );
+        }
+
+        String[] tagArray = tString.split( "," );
+        tagString = StaticMethods.removeDuplicate( tagArray );
+        searchTagsText.setText( tagString );
         searchTagsText.setVisibility( View.VISIBLE );
     }
+
     private void getFinalTagList(){
         String tString;
         tString = newProFullName.getText().toString() + " " + newProdShortName.getText().toString();
         tString.replaceAll( "[^a-zA-Z0-9 ]", "" );
 
-        tagString = SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + tString.toLowerCase().replaceAll( " ", ", " );
-        tagString = StaticMethods.removeDuplicate( tagString );
+        tString = tString + ", " + SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", " + tString.toLowerCase().replaceAll( " ", ", " );
+        String[] tagArray = tString.split( " " );
+
+        tagString = StaticMethods.removeDuplicate( tagArray );
     }
 
-    // Price and Discount TextWatcher...
+    // Price and Discount && Veg- Non Veg TextWatcher...
     private void priceAndDiscountTextWatcher(){
         newProMrpRate.addTextChangedListener( new TextWatcher() {
             @Override
@@ -566,26 +601,47 @@ public class AddNewProductActivity extends AppCompatActivity {
                 break;
         }
     }
-    // Price and Discount TextWatcher...
+    //  Veg- Non Veg
+    private void selectProductVegNoNType(){
+        // Select Banner Type...
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter <String>(this,
+                android.R.layout.simple_spinner_item, getResources().getStringArray( R.array.product_vegan_mark ));
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        newProVeganMark.setAdapter(dataAdapter);
+        newProVeganMark.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView <?> parent, View view, int position, long id) {
 
-    // Get Result of Image...
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult( requestCode, resultCode, data );
-        if (requestCode == GALLERY_CODE ){
-            if (resultCode == RESULT_OK){
-                if (data != null){
-//                    productImgsUriList.add( data.getData() );
-//                    productImageLinkList.add( data.getData().toString() );
-                    uploadImageDataModelList.add( new UploadImageDataModel( data.getData().toString(), "") );
-                    isUploadImages = false;
-                    imgAdaptor.notifyDataSetChanged();
+                if (position != 0){ // Product Type
+                    switch (position){
+                        case 1: // Pure Veg
+                            productLabelVeganMark = PRODUCT_LACTO_VEG;
+                            break;
+                        case 2: // Non Veg
+                            productLabelVeganMark = PRODUCT_LACTO_NON_VEG;
+                            break;
+                        case 3: // Egg
+                            productLabelVeganMark = PRODUCT_LACTO_EGG;
+                            break;
+                        case 4: // Others
+                            productLabelVeganMark = PRODUCT_OTHERS;
+                            break;
+                        default:
+                            break;
+                    }
+
                 }else{
-                    showToast(  "Image not Found..!" );
+                    productLabelVeganMark = 0;
                 }
             }
-        }
+            @Override
+            public void onNothingSelected(AdapterView <?> parent) {
+//
+            }
+        } );
     }
+    // Price and Discount TextWatcher...
+
     // Permission...
     private boolean isPermissionGranted(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -612,6 +668,71 @@ public class AddNewProductActivity extends AppCompatActivity {
             }
         }
     }
+    // Get Result of Image...
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult( requestCode, resultCode, data );
+        if (requestCode == GALLERY_CODE ){
+            if (resultCode == RESULT_OK){
+                if (data != null){
+                    Uri uri = data.getData();
+                    startCropImageActivity(uri);
+//                    productImageLinkList.add( data.getData().toString() );
+
+//                    uploadImageDataModelList.add( new UploadImageDataModel( data.getData().toString(), "") );
+//                    isUploadImages = false;
+//                    imgAdaptor.notifyDataSetChanged();
+                }else{
+                    showToast(  "Image not Found..!" );
+                }
+            }
+        }
+        // Get Response of cropped Image method....
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+//                Bitmap bitmap = result.getBitmap();
+//                Glide.with( this ).load( resultUri ).into( croppedImage );
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), resultUri);
+                    startCompressImage(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+                showToast( error.getMessage() );
+            }
+        }
+
+    }
+    private void startCropImageActivity(Uri imageUri) {
+        CropImage.activity(imageUri)
+                .setGuidelines( CropImageView.Guidelines.ON)
+//                .setAspectRatio( 1,1 )
+                .setMultiTouchEnabled(true)
+                .start(this);
+    }
+    public Uri getImageUri( Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), inImage, "Title", null);
+//        MediaStore.Images.Media.getContentUri(  );
+        return Uri.parse(path);
+    }
+    private void startCompressImage(@NonNull Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress( Bitmap.CompressFormat.JPEG,50, stream);
+        byte[] BYTE = stream.toByteArray();
+        Bitmap newBitmap = BitmapFactory.decodeByteArray(BYTE,0,BYTE.length);
+//        bannerImageUri = getImageUri(newBitmap);
+
+        uploadImageDataModelList.add( new UploadImageDataModel( getImageUri(newBitmap).toString(), "") );
+        isUploadImages = false;
+        imgAdaptor.notifyDataSetChanged();
+
+    }
 
     // ----------------  Image Adaptor and Model Class ---------------------------------------------
     private class AddImageAdaptor extends RecyclerView.Adapter<AddImageAdaptor.ViewHolder> {
@@ -630,7 +751,7 @@ public class AddNewProductActivity extends AppCompatActivity {
             int size = uploadImageDataModelList.size();
             if (position < size){
                 holder.setData( uploadImageDataModelList.get( position ).getImgLink(), position );
-            }else if (size < 6){
+            }else if (size < 8){
                 holder.addNewImage();
             }
 
@@ -638,7 +759,7 @@ public class AddNewProductActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            if (uploadImageDataModelList.size() < 6){
+            if (uploadImageDataModelList.size() < 8){
                 return uploadImageDataModelList.size() + 1;
             }else{
                 return uploadImageDataModelList.size();
@@ -800,7 +921,7 @@ public class AddNewProductActivity extends AppCompatActivity {
                     uploadImageDataModelList.get( uploadedSize ).setImgName( fileName );
 //                            AddNewProductActivity.productImageLinkList.add( uploadedSize,  task.getResult().toString() );
                     productImageSelectList.set( (uploadedSize + 1), "Image " + (uploadedSize + 1) );
-                    dataAdapter.notifyDataSetChanged();
+//                    dataAdapter.notifyDataSetChanged();
 //                    perDialog.dismiss();
                     dialog.dismiss();
                     if ( uploadedSize == uploadImageDataModelList.size() - 1 ){
@@ -827,7 +948,7 @@ public class AddNewProductActivity extends AppCompatActivity {
             productImageSelectList.add( "Select Image" );
             for (int i = 1; i <= tempSize; i++){
                 productImageSelectList.add( "Image "+ i );
-                dataAdapter.notifyDataSetChanged();
+//                dataAdapter.notifyDataSetChanged();
             }
         }
         uploadImageDataModelList.remove( position );
@@ -835,10 +956,29 @@ public class AddNewProductActivity extends AppCompatActivity {
     }
     //----------
 
+    //---------- Check Product Id is exist already or Not...
+    private void checkForProductID( ){
+        firebaseFirestore
+                .collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "PRODUCTS" ).document( uploadProductID )
+                .addSnapshotListener( new EventListener <DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        if (documentSnapshot.exists()){
+                            // Regenerate Product ID...
+                            uploadProductID = StaticMethods.getRandomProductId( AddNewProductActivity.this );
+                            checkForProductID();
+                        }else{
+                            // Set Product ID...
+                            newProductIDText.setText( "Product ID : " +  uploadProductID );
+                        }
+                    }
+                } );
+    }
     // --------------- Upload Data on Database.. ---------------------------------------------------
-    private void createMapToUpload(String pID){
+    private void createMapToUpload(String pID, int verNo){
         String productID = pID;
-        int verNo = 1;
+//        int verNo = 1;
         Map <String, Object> updateMap = new HashMap <>();
         updateMap.clear();
 
@@ -847,6 +987,7 @@ public class AddNewProductActivity extends AppCompatActivity {
         for (UploadImageDataModel model : uploadImageDataModelList){
             imageList.add( model.getImgLink() );
         }
+
         // Searching Tag...
         String [] sTags = tagString.split( ", " );
         List<String> tagList = new ArrayList <>();
@@ -861,27 +1002,37 @@ public class AddNewProductActivity extends AppCompatActivity {
          3. V - Visible to search...
          4. I - InVisible : Stop from searching etc...
          */
+        Boolean p_is_cod = false;
+        if (newProCodSwitch.isChecked()){
+            p_is_cod = true;
+        }
+
         updateMap.put( "a_current_state", "Y" );  // Check the current State
         updateMap.put( "a_no_of_uses", 1 ); // Check No. Of Uses...
         updateMap.put( "p_id", productID );
         // Primary - fields..
         updateMap.put( "p_main_name", newProFullName.getText().toString() );
-        updateMap.put( "p_main_image", newProdShortName.getText().toString() );
+        updateMap.put( "p_main_image", imageList.get( 0 ) );
         updateMap.put( "p_weight_type", qtyTypeText );
-        updateMap.put( "p_veg_non_type", newProMrpRate.getText().toString().trim() );
-        updateMap.put( "p_is_cod", newProRsDiscount.getText().toString() );
+        updateMap.put( "p_veg_non_type", String.valueOf( productLabelVeganMark ) );
         updateMap.put( "p_offer_code", "" );
+        updateMap.put( "p_is_cod", p_is_cod );
 
+        updateMap.put( "p_no_of_variants", verNo );
         // first version...
         updateMap.put( "p_name_"+verNo, newProdShortName.getText().toString() );
         updateMap.put( "p_selling_price_"+verNo,  newProSellingPrice.getText().toString().trim()  );
         updateMap.put( "p_mrp_price_"+verNo, newProMrpRate.getText().toString().trim() );
         updateMap.put( "p_weight_"+verNo, newProVersionWeight.getText().toString() + qtyTypeText );
-        updateMap.put( "p_stocks_"+verNo, "name" );
-        updateMap.put( "p_offer_"+verNo, "name" );
+        updateMap.put( "p_stocks_"+verNo, newProStockAvailable.getText().toString() );
+        updateMap.put( "p_offer_"+verNo, "" );
         updateMap.put( "p_off_per_"+verNo, newProPerDiscount.getText().toString() );
         updateMap.put( "p_off_rupee_"+verNo, newProRsDiscount.getText().toString() );
-        updateMap.put( "p_extra_amount_"+verNo, "name" );
+        updateMap.put( "p_extra_amount_"+verNo, "" );
+
+        // Description and Specifications...
+        updateMap.put( "p_description_"+verNo, "" );
+        updateMap.put( "p_specification_"+verNo, "" );
         // Images...
         updateMap.put( "p_image_"+verNo, imageList );
         // Tags...
@@ -889,12 +1040,37 @@ public class AddNewProductActivity extends AppCompatActivity {
 
         updateMap.put( "product_details", newProDetails.getText().toString() );
 
-        updateMap.put( "p_cod", true );
+
+        // To add in Local List...
+
+        List<ProductSubModel> tempPSubList = new ArrayList <>();
+        tempPSubList.add(
+                new ProductSubModel(
+                        newProFullName.getText().toString(),
+                        imageList,
+                        newProSellingPrice.getText().toString().trim(),
+                        newProMrpRate.getText().toString().trim(),
+                        newProVersionWeight.getText().toString() + qtyTypeText,
+                        newProStockAvailable.getText().toString(),
+                        ""
+                ) );
+
+        ProductModel productModel = new ProductModel(
+                productID,
+                newProFullName.getText().toString() ,
+                newProDetails.getText().toString(),
+                p_is_cod,
+                String.valueOf(verNo),
+                qtyTypeText,
+                productLabelVeganMark,
+                tempPSubList
+        );
 
         // Upload On The Database...
-        updateProduct( productID,  updateMap);
+        updateProduct( productID,  updateMap, productModel);
+
     }
-    private void updateProduct(String productID, Map<String, Object> updateMap){
+    private void updateProduct(final String productID, Map<String, Object> updateMap, final ProductModel productModel){
 
       /**  if (useTabLayoutSwitch.isChecked()){
             updateMap.put( "use_tab_layout", true );
@@ -925,14 +1101,8 @@ public class AddNewProductActivity extends AppCompatActivity {
                             if (isUpdateRequest){
                                 dialog.dismiss();
                                 showToast( "Update Product Successfully..!" );
-                                finish();
-                            }else{
-//                                HrLayoutItemModel hrLayoutItemModel = new HrLayoutItemModel( uploadProductID, mainImageLink,
-//                                        newProFullName.getText().toString(), newProSellingPrice.getText().toString().trim(),
-//                                        newProMrpRate.getText().toString().trim(), Long.parseLong( newProStockAvailable.getText().toString() ), true);
-//
-//                                requestUpdateInCatData(dialog, hrLayoutItemModel);
                             }
+                            updateProductOnDatabase(  productID, productModel );
                         }else{
                             dialog.dismiss();
                             showToast( "Failed to Add Product..!" );
@@ -941,25 +1111,73 @@ public class AddNewProductActivity extends AppCompatActivity {
                 } );
     }
 
-    //---------- Check Product Id is exist already or Not...
-    private void checkForProductID( ){
-        firebaseFirestore
-                .collection( "SHOPS" ).document( SHOP_ID )
-                .collection( "PRODUCTS" ).document( uploadProductID )
-                .addSnapshotListener( new EventListener <DocumentSnapshot>() {
+    private void updateProductOnDatabase(  final String productID, final ProductModel productModel ){
+        Map <String, Object> updateMap = new HashMap <>();
+        int pListIndex = homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex ).getProductIdList().size() + 1;
+        updateMap.put( "no_of_products", pListIndex  );
+        updateMap.put( "product_id_"+pListIndex, productID  );
+        if (pListIndex == 4){
+            updateMap.put( "visibility", true  );
+        }
+
+        homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex ).getProductIdList().add( productID ); // Add product ID in the main List
+
+        if (pListIndex < 4){
+            homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex ).getProductModelList().add( productModel ); // Add Product in the main List
+        }
+
+        // we are set our unique Id... Because we need this id to update data...
+//        String documentId = layoutMap.get( "layout_id" ).toString();
+        String categoryID = homeCatListModelList.get( catIndex ).getCatID();
+        String documentId = homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex ).getLayoutID(); // layout_id
+
+        firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
+                .collection( categoryID ).document( documentId ).update( updateMap )
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
                     @Override
-                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                        if (documentSnapshot.exists()){
-                            // Regenerate Product ID...
-                            uploadProductID = StaticMethods.getRandomProductId( AddNewProductActivity.this );
-                            checkForProductID();
-                        }else{
-                            // Set Product ID...
-                            newProductIDText.setText( "Product ID : " +  uploadProductID );
+                    public void onComplete(@NonNull Task <Void> task) {
+                        if (task.isSuccessful()){
+                            dialog.dismiss();
+                            showToast( "Added Successfully..!" );
+                            HomeFragment.homePageAdaptor.notifyDataSetChanged();
+                            finish();
+                        }
+                        else{
+                            dialog.dismiss();
+                            showToast( "Product Added..! Error : " + task.getException().getMessage() );
+                            finish();
                         }
                     }
                 } );
+
     }
+    // CollectionID : CAT_ID
+    // Documents ID : layout_id
+    // Updates...
+    // 1. no_of_products
+    // 2. product_id_
+    // 3. visibility
+    /* Local List...
+     homeListModelList.add( new HomeListModel( viewType, layout_id, layout_title, hrAndGridProductIdList,
+                                            new ArrayList <ProductModel>() ) );
+     */
+     /*
+
+    < List>
+        List<HomeCatListModel> homeCatListModelList
+        catID
+        <List>
+            List<HomeListModel> homeListModelList
+             < List>
+                List<ProductModel> productModelList
+                productLayId
+                Product ID List
+                layoutGridTitle
+            </List>
+        </List>
+    </List>
+
+     */
 
 
 }

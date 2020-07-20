@@ -29,6 +29,14 @@
         <!--        <item>Shop Promotion</item>-->
     </string-array>
 
+    <string-array name="product_vegan_mark">
+        <item>Select-Type</item>
+        <item>Pure Veg</item>
+        <item>Non Veg</item>
+        <item>Eggs Mark</item>
+        <item>Other/None</item>
+    </string-array>
+
     <string-array name="qty_auto_text_list">
         <item>Select Qty Type</item>
         <item>Piece</item>

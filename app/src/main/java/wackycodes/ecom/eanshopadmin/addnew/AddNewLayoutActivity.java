@@ -679,6 +679,4 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
     }
 
 
-
-
 }

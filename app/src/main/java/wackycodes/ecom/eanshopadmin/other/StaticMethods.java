@@ -107,17 +107,17 @@ public class StaticMethods {
     }
 
     // Remove Duplicate from string...
-    public static String removeDuplicate(String reqString){
+    public static String removeDuplicate(String[] reqString){
         // Remove duplicates...
         LinkedHashSet <String> tagSet = new LinkedHashSet <>( Arrays.asList(reqString));
         StringBuffer stringBuffer = new StringBuffer();
         int tempInd = 0;
 
         for (String s : tagSet){
-            if (tempInd > 0){
-                stringBuffer.append( " " );
+            if (s != null){
+                stringBuffer.append( s.trim() );
+                stringBuffer.append( ", " );
             }
-            stringBuffer.append( s );
             tempInd++;
         }
 

@@ -48,6 +48,28 @@ public class DBQuery {
     public static List<HomeCatListModel> homeCatListModelList = new ArrayList <>();
     private static List<HomeListModel> homeListModelList;
     private static List<BannerModel> bannerModelList;
+    // To Understand list inside list...
+     /*
+
+    < List>
+        List<HomeCatListModel> homeCatListModelList
+        catID
+
+        < List>
+            List<HomeListModel> homeListModelList
+             < List>
+                List<ProductModel> productModelList
+                productLayId
+                Product ID List
+                layoutGridTitle
+
+            </List>
+
+        </List>
+
+    </List>
+
+     */
 
     // Get City List... // Not Required...
     public static void getCityListQuery(){ /**

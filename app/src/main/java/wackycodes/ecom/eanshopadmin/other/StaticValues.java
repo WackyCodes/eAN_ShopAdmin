@@ -13,7 +13,7 @@ public class StaticValues {
     public static String CURRENT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_CODE = "BHOPAL";
     public static String SHOP_ID = "462019274";
-    public static String SHOP_NAME = "462019274";
+    public static String SHOP_NAME = "An shop";
 
     public static final AdminDataModel ADMIN_DATA_MODEL = new AdminDataModel();
 
@@ -76,6 +76,12 @@ public class StaticValues {
     public static final int SHOP_TYPE_NON_VEG = 2;
     public static final int SHOP_TYPE_VEG_NON = 3;
     public static final int SHOP_TYPE_NO_SHOW = 4;
+
+    // Veg/NonVeg Label...
+    public static final int PRODUCT_LACTO_VEG = 1;
+    public static final int PRODUCT_LACTO_NON_VEG = 2;
+    public static final int PRODUCT_LACTO_EGG = 5;
+    public static final int PRODUCT_OTHERS = 4;
 
     // Main Page To another...
     public static final int REQUEST_TO_ADD_SHOP = 1;

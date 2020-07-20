@@ -616,7 +616,6 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                         }
                     }
                 }else{
-
                     productHrGridAdaptor = new ProductHrGridAdaptor( catIndex, index, VIEW_HORIZONTAL_LAYOUT, productModelList );
                     productRecyclerView.setAdapter( productHrGridAdaptor );
                     productHrGridAdaptor.notifyDataSetChanged();
@@ -703,16 +702,15 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
                                 // We can use Array...
                                 ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
-                                int sz = Images.size();
-                                String[] pImage = new String[sz];
-                                for (int i = 0; i < sz; i++){
-                                    pImage[i] = Images.get( i );
-                                }
-
+//                                int sz = Images.size();
+//                                String[] pImage = new String[sz];
+//                                for (int i = 0; i < sz; i++){
+//                                    pImage[i] = Images.get( i );
+//                                }
                                 // add Data...
                                 productSubModelList.add( new ProductSubModel(
                                         task.getResult().get( "p_name_"+tempI).toString(),
-                                        pImage,
+                                        Images,
                                         task.getResult().get( "p_selling_price_"+tempI).toString(),
                                         task.getResult().get( "p_mrp_price_"+tempI).toString(),
                                         task.getResult().get( "p_weight_"+tempI).toString(),

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <group
+        android:id="@+id/menu_edit_product_options"
+        android:visible="true"
+        android:enabled="true"
+        android:menuCategory="container">
+
+        <item
+            android:id="@+id/menu_add_another_varient"
+            android:iconTint="@color/colorPrimary"
+            android:orderInCategory="100"
+            android:title="+ Add Another Variety"/>
+        <item
+            android:id="@+id/menu_stock_update"
+            android:orderInCategory="100"
+            android:title="Stock Update"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_price_update"
+            android:orderInCategory="100"
+            android:title="Price/Mrp Update"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_cod_update"
+            android:orderInCategory="100"
+            android:title="COD ON/OFF"
+            android:iconTint="@color/colorPrimary"/>
+
+
+        <item
+            android:id="@+id/menu_edit_name"
+            android:orderInCategory="100"
+            android:title="Update Name"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_edit_details"
+            android:orderInCategory="100"
+            android:title="Update details"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_update_images"
+            android:orderInCategory="100"
+            android:title="Update Images"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_update_specifications"
+            android:orderInCategory="100"
+            android:title="Update Specifications"
+            android:iconTint="@color/colorPrimary"/>
+
+        <item
+            android:id="@+id/menu_remove_products"
+            android:orderInCategory="100"
+            android:title="Remove Products"
+            android:iconTint="@color/colorPrimary"/>
+
+
+    </group>
+
+
+</menu>
