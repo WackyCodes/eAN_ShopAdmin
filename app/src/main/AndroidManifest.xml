@@ -16,8 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".product.productview.ProductDetails"></activity>
-        <activity android:name=".addnew.AddNewProductActivity" />
+        <activity android:name=".addnew.AddNewImageActivity"></activity>
+        <activity android:name=".addnew.newproduct.AddSpecificationActivity" />
+        <activity android:name=".product.productview.ProductDetails" />
+        <activity android:name=".addnew.newproduct.AddNewProductActivity" />
         <activity android:name=".addnew.AddNewLayoutActivity" />
         <activity android:name=".home.HomeActivity" />
         <activity android:name=".launching.WelcomeActivity">

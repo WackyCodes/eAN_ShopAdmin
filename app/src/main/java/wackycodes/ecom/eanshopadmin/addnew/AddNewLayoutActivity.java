@@ -17,7 +17,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -34,6 +36,9 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -45,12 +50,14 @@ import java.util.List;
 import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.home.HomeListModel;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
 import wackycodes.ecom.eanshopadmin.other.CheckInternetConnection;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
+import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 import wackycodes.ecom.eanshopadmin.other.UpdateImages;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 
@@ -83,7 +90,7 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
     private TextView bannerDialogOkBtn;
     private TextView bannerDialogUploadImage;
 
-    private TextView bannerProductIdText;
+    private EditText bannerProductIdText;
     private TextView bannerNewProductBtn;
 
     private int bannerDialogType;
@@ -239,6 +246,32 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
         } );
         // Select Banner Type...
 
+        // Text Watcher...
+        bannerProductIdText.addTextChangedListener( new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (!TextUtils.isEmpty( bannerProductIdText.getText().toString() )){
+                    if(bannerProductIdText.getText().toString().length() >= 10){
+                        // Check whether is Exist...
+                        dialog.show();
+                        checkForProductID( bannerProductIdText.getText().toString() );
+                    }else{
+                        bannerClickID = null;
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        } );
+
     }
 
     // OnClick Item...
@@ -286,12 +319,12 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
             if (UpdateImages.uploadImageLink != null && bannerClickType != -1  ){
                 switch (bannerClickType){
                     case BANNER_CLICK_TYPE_PRODUCT:
-                        if ( bannerClickID != null ){
+                        if (bannerClickID != null){
+//                            bannerClickID = bannerProductIdText.getText().toString().trim();
                             // Upload Data on Database...
                             addNewLayout( bannerDialogType );
                         }else{
-                            bannerProductIdText.setError( "Not Found!" );
-                            showToast( "Choose New ID.!" );
+                            bannerProductIdText.setError( "InCorrect!" );
                         }
                     default:
                         break;
@@ -309,15 +342,7 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
             }
         }
         // --------- Add New Banner in Slider or Add ad layout of Strip or Banner...!
-        else if(v == bannerProductIdText){
-            // Paste ProductId...
-            if (clipboardManager.hasPrimaryClip()){
-                bannerClickID = clipboardManager.getPrimaryClip().getItemAt( 0 ).getText().toString();
-                bannerProductIdText.setText( bannerClickID );
-            }else{
-                showToast( "No product Id found! Click on NEW button" );
-            }
-        }else if (v == bannerNewProductBtn){
+        else if (v == bannerNewProductBtn){
             // TODO : New Product ID : GOTO search Product...
         }
     }
@@ -677,6 +702,28 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
         Glide.with( this ).load( bannerImageUri ).into( bannerDialogBannerImage );
 
     }
+
+    //---------- Check Product Id is exist already or Not...
+    private void checkForProductID( final String uploadProductID ){
+        firebaseFirestore
+                .collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "PRODUCTS" ).document( uploadProductID )
+                .addSnapshotListener( new EventListener <DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        if (documentSnapshot.exists()){
+                            // Regenerate Product ID...
+                            bannerClickID = uploadProductID;
+                        }else{
+                            // Set Product ID...
+                            bannerClickID = null;
+                            bannerProductIdText.setError( "Not Found!" );
+                        }
+                        dialog.dismiss();
+                    }
+                } );
+    }
+
 
 
 }

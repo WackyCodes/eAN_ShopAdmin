@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:padding="4dp"
+    android:id="@+id/shop_set_up_fragment_frame"
+    tools:context=".launching.ShopSetUpFragment">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:background="@drawable/back_design_one"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Shop Update"
+            android:gravity="center"
+            android:textColor="@color/colorDarkViolet"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:textSize="24dp"
+            />
+
+        <EditText
+            android:id="@+id/shop_owner_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_account_circle_black_24dp"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/colorPrimary"
+            android:textColor="@color/colorPrimary"
+            android:layout_margin="4dp"
+            android:hint="Shop Owner Name*"/>
+
+        <EditText
+            android:id="@+id/shop_helpline_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_phone_black_24dp"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/colorPrimary"
+            android:textColor="@color/colorPrimary"
+            android:layout_margin="4dp"
+            android:hint="Enter Helpline Number "/>
+
+        <EditText
+            android:id="@+id/shop_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_email_black_24dp"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/colorPrimary"
+            android:textColor="@color/colorPrimary"
+            android:layout_margin="4dp"
+            android:hint="Enter Email "/>
+
+        <EditText
+            android:id="@+id/shop_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_store_black_24dp"
+            android:drawablePadding="4dp"
+            android:drawableTint="@color/colorPrimary"
+            android:textColor="@color/colorPrimary"
+            android:layout_margin="4dp"
+            android:hint="Enter Shop Address "/>
+
+        <Button
+            android:id="@+id/update_and_continue_to_main_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:text="Update and Continue >>"
+            android:textColor="@color/colorWhite"
+            android:backgroundTint="@color/colorPrimary"/>
+
+
+    </LinearLayout>
+
+
+</FrameLayout>

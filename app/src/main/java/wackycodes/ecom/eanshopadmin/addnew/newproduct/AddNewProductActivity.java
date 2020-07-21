@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanshopadmin.addnew;
+package wackycodes.ecom.eanshopadmin.addnew.newproduct;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,15 +58,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.home.HomeFragment;
+import wackycodes.ecom.eanshopadmin.other.CheckInternetConnection;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.StaticMethods;
-import wackycodes.ecom.eanshopadmin.other.UpdateImages;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
 
@@ -79,7 +78,6 @@ import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_OTHERS;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.READ_EXTERNAL_MEMORY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_NAME;
-import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_TYPE_VEG;
 
 public class AddNewProductActivity extends AppCompatActivity {
 
@@ -123,6 +121,9 @@ public class AddNewProductActivity extends AppCompatActivity {
     private Switch newProCodSwitch; // new_pro_cod_switch\
     private Spinner newProVeganMark; // new_pro_veg_non_type
 
+    private LinearLayout newProVeganLayoutSample; // new_pro_label_vegan_sample_layout
+    private TextView newProDetailsSampleText;
+
     //            <!-- Section 3: Add Descriptions and Specifications...-->
 //    private LinearLayout secAddDesSpecifyLayout; // sec_3_add_des_specific_layout
 //    private Switch   useTabLayoutSwitch; // new_pro_tab_layout_switch_sec_3
@@ -159,8 +160,10 @@ public class AddNewProductActivity extends AppCompatActivity {
     private String productCat;
     private int catIndex;
     private int layIndex;
+    private int productIndex;
     private String qtyTypeText = null;
     private String tagString;
+    private int verCode = 1;
 
     //    private DocumentSnapshot documentSnapshot;
     private boolean isUpdateRequest = false;
@@ -180,8 +183,7 @@ public class AddNewProductActivity extends AppCompatActivity {
         layIndex = getIntent().getIntExtra( "LAY_INDEX", -1 );
         isUpdateRequest = getIntent().getBooleanExtra( "UPDATE", false );
 
-        // Add New Product Id...
-        uploadProductID = StaticMethods.getRandomProductId( this );
+        productIndex = getIntent().getIntExtra( "PRO_INDEX", -1 );
 
         newProductIDText = findViewById( R.id.new_pro_id_text );
 //            <!--    Section 1: Add Images..-->
@@ -219,10 +221,34 @@ public class AddNewProductActivity extends AppCompatActivity {
 //        submit Button.. Assigning...
         newProSubmitBtn = findViewById( R.id.new_pro_upload_btn );
 
+        newProVeganLayoutSample = findViewById( R.id.new_pro_label_vegan_sample_layout );
+        newProDetailsSampleText = findViewById( R.id.new_pro_details_sample_textview );
+
         //------------------------------------------------------------------------------------
 
+        if (isUpdateRequest){
+//            newProCodSwitch.setVisibility( View.INVISIBLE );
+            newProDetailsSampleText.setVisibility( View.GONE );
+            newProVeganLayoutSample.setVisibility( View.GONE );
+            newProDetails.setVisibility( View.GONE );
+
+            verCode = homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex )
+                    .getProductModelList().get( productIndex ).getProductSubModelList().size() + 1;
+            uploadProductID = homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex ).getProductModelList().get( productIndex ).getpProductID();
+
+            getTagsFromDatabase();
+            newProductIDText.setText( "Product ID : " +  uploadProductID );
+        }
+        else{
+            newProDetailsSampleText.setVisibility( View.VISIBLE );
+            newProVeganLayoutSample.setVisibility( View.VISIBLE );
+            newProDetails.setVisibility( View.VISIBLE );
+            // Add New Product Id...
+            uploadProductID = StaticMethods.getRandomProductId( this );
+            checkForProductID(); // Check Product ID is Exist or not...
+        }
+
 //        newProductIDText.setText( "Product ID : " +  uploadProductID );
-        checkForProductID(); // Check Product ID is Exist or not...
 
         imgAdaptor = new AddImageAdaptor();
         productImageSelectList = new ArrayList <>();
@@ -337,11 +363,11 @@ public class AddNewProductActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.show();
-                if (isValidFieldsData()){
+                if (isValidFieldsData() && CheckInternetConnection.isInternetConnected( AddNewProductActivity.this )){
 //                    updateProduct(); // TODO: JOB..!
 //                    getFinalTagList();
                     updateTagList( SHOP_ID );
-                    createMapToUpload( uploadProductID, 1 );
+                    createMapToUpload( uploadProductID, verCode );
                 }else{
                     dialog.dismiss();
                 }
@@ -386,7 +412,7 @@ public class AddNewProductActivity extends AppCompatActivity {
         }
         if (isNotEmptyEditText( newProFullName ) && isNotEmptyEditText( newProdShortName )&&
                 isNotEmptyEditText( newProMrpRate )&& isNotEmptyEditText( newProSellingPrice )&&
-                isNotEmptyEditText( newProStockAvailable ) && isNotEmptyEditText( newProDetails ) ){
+                isNotEmptyEditText( newProStockAvailable ) ){
             if (Integer.parseInt( newProMrpRate.getText().toString()) < Integer.parseInt( newProSellingPrice.getText().toString() )){
                 dialog.dismiss();
                 DialogsClass.alertDialog( this, null, "Selling price can not greater than MRP rate..!" ).show();
@@ -397,15 +423,27 @@ public class AddNewProductActivity extends AppCompatActivity {
 //                DialogsClass.alertDialog( this, null, "Select Main Image..!" ).show();
 //                return false;
 //            }
+
+//            &&
+
+            if(!isUpdateRequest){
+                // Not Update request....
+                if (productLabelVeganMark == 0){
+                    DialogsClass.alertDialog( this, null, "Select Product Label..!" ).show();
+                    return false;
+                }
+                if (isNotEmptyEditText( newProDetails )){
+                    showToast( "Enter Missing Fields!" );
+                    return false;
+                }
+            }
+
             if (qtyTypeText == null){
                 dialog.dismiss();
                 DialogsClass.alertDialog( this, null, "Select Quantity Type..!" ).show();
                 return false;
             }
-            if (productLabelVeganMark == 0){
-                DialogsClass.alertDialog( this, null, "Select Product Label..!" ).show();
-                return false;
-            }
+
 
             if (isNotEmptyEditText(newProVersionWeight)){ // Finally....
                 return true;
@@ -442,17 +480,6 @@ public class AddNewProductActivity extends AppCompatActivity {
         tagString = StaticMethods.removeDuplicate( tagArray );
         searchTagsText.setText( tagString );
         searchTagsText.setVisibility( View.VISIBLE );
-    }
-
-    private void getFinalTagList(){
-        String tString;
-        tString = newProFullName.getText().toString() + " " + newProdShortName.getText().toString();
-        tString.replaceAll( "[^a-zA-Z0-9 ]", "" );
-
-        tString = tString + ", " + SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", " + tString.toLowerCase().replaceAll( " ", ", " );
-        String[] tagArray = tString.split( " " );
-
-        tagString = StaticMethods.removeDuplicate( tagArray );
     }
 
     // Price and Discount && Veg- Non Veg TextWatcher...
@@ -975,6 +1002,25 @@ public class AddNewProductActivity extends AppCompatActivity {
                     }
                 } );
     }
+
+    private void getTagsFromDatabase(){
+        firebaseFirestore
+                .collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "PRODUCTS" ).document( uploadProductID )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                ArrayList<String> tags = (ArrayList <String>) task.getResult().get( "tags" );
+                String tagsString = tags.get( 0 );
+                for (String s: tags){
+                    tagsString = tagsString + ", " + s;
+                }
+
+                tagString = tagsString;
+            }
+        } );
+    }
+
     // --------------- Upload Data on Database.. ---------------------------------------------------
     private void createMapToUpload(String pID, int verNo){
         String productID = pID;
@@ -1007,17 +1053,7 @@ public class AddNewProductActivity extends AppCompatActivity {
             p_is_cod = true;
         }
 
-        updateMap.put( "a_current_state", "Y" );  // Check the current State
-        updateMap.put( "a_no_of_uses", 1 ); // Check No. Of Uses...
-        updateMap.put( "p_id", productID );
-        // Primary - fields..
-        updateMap.put( "p_main_name", newProFullName.getText().toString() );
-        updateMap.put( "p_main_image", imageList.get( 0 ) );
-        updateMap.put( "p_weight_type", qtyTypeText );
-        updateMap.put( "p_veg_non_type", String.valueOf( productLabelVeganMark ) );
-        updateMap.put( "p_offer_code", "" );
-        updateMap.put( "p_is_cod", p_is_cod );
-
+        // Product SubList..-----------------------------------------------
         updateMap.put( "p_no_of_variants", verNo );
         // first version...
         updateMap.put( "p_name_"+verNo, newProdShortName.getText().toString() );
@@ -1037,40 +1073,67 @@ public class AddNewProductActivity extends AppCompatActivity {
         updateMap.put( "p_image_"+verNo, imageList );
         // Tags...
         updateMap.put( "tags", tagList );
+        // Product SubList..-----------------------------------------------
 
-        updateMap.put( "product_details", newProDetails.getText().toString() );
-
-
-        // To add in Local List...
-
-        List<ProductSubModel> tempPSubList = new ArrayList <>();
-        tempPSubList.add(
-                new ProductSubModel(
-                        newProFullName.getText().toString(),
-                        imageList,
-                        newProSellingPrice.getText().toString().trim(),
-                        newProMrpRate.getText().toString().trim(),
-                        newProVersionWeight.getText().toString() + qtyTypeText,
-                        newProStockAvailable.getText().toString(),
-                        ""
-                ) );
-
-        ProductModel productModel = new ProductModel(
-                productID,
-                newProFullName.getText().toString() ,
-                newProDetails.getText().toString(),
-                p_is_cod,
-                String.valueOf(verNo),
-                qtyTypeText,
-                productLabelVeganMark,
-                tempPSubList
+        ProductSubModel productSubModel = new ProductSubModel(
+                newProFullName.getText().toString(),
+                imageList,
+                newProSellingPrice.getText().toString().trim(),
+                newProMrpRate.getText().toString().trim(),
+                newProVersionWeight.getText().toString() + qtyTypeText,
+                newProStockAvailable.getText().toString(),
+                ""
         );
 
-        // Upload On The Database...
-        updateProduct( productID,  updateMap, productModel);
+         /*
+        Check => isUpdate ?
+            YES =>
+              Update On local List And Product Database...
+            NO =>
+                Update on Product List Database and Product Collection and local list...
+         */
+        if (isUpdateRequest){
+            // Ad Another Version...
+            updateProductAnotherVersion(productID,  updateMap, productSubModel );
+
+        }
+        else{
+            // To add in Local List... New Product...
+            updateMap.put( "a_current_state", "Y" );  // Check the current State
+            updateMap.put( "a_no_of_uses", 1 ); // Check No. Of Uses...
+            updateMap.put( "p_id", productID );
+            // Primary - fields..
+            updateMap.put( "p_main_name", newProFullName.getText().toString() );
+            updateMap.put( "p_main_image", imageList.get( 0 ) );
+            updateMap.put( "p_weight_type", qtyTypeText );
+            updateMap.put( "p_veg_non_type", String.valueOf( productLabelVeganMark ) );
+            updateMap.put( "p_offer_code", "" );
+            updateMap.put( "p_is_cod", p_is_cod );
+
+            updateMap.put( "product_details", newProDetails.getText().toString() );
+
+            List<ProductSubModel> tempPSubList = new ArrayList <>();
+            tempPSubList.add( productSubModel );
+
+            ProductModel productModel = new ProductModel(
+                    productID,
+                    newProFullName.getText().toString() ,
+                    newProDetails.getText().toString(),
+                    p_is_cod,
+                    String.valueOf(verNo),
+                    qtyTypeText,
+                    productLabelVeganMark,
+                    tempPSubList
+            );
+
+            // Upload On The Database...
+            uploadProduct( productID,  updateMap, productModel);
+        }
 
     }
-    private void updateProduct(final String productID, Map<String, Object> updateMap, final ProductModel productModel){
+
+    /// Add New Products....
+    private void uploadProduct(final String productID, Map<String, Object> updateMap, final ProductModel productModel){
 
       /**  if (useTabLayoutSwitch.isChecked()){
             updateMap.put( "use_tab_layout", true );
@@ -1151,6 +1214,35 @@ public class AddNewProductActivity extends AppCompatActivity {
                 } );
 
     }
+    /// Add Another Version...
+    private void updateProductAnotherVersion(final String productID, Map<String, Object> updateMap, final ProductSubModel productSubModel){
+        firebaseFirestore
+                .collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "PRODUCTS" ).document( productID )
+                .update( updateMap )
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task <Void> task) {
+                        if (task.isSuccessful()){
+                            // Add Version... In Local List..
+                            homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex )
+                                    .getProductModelList().get( productIndex ).getProductSubModelList().add( productSubModel );
+                            homeCatListModelList.get( catIndex ).getHomeListModelList().get( layIndex )
+                                    .getProductModelList().get( productIndex ).setpNumOfProducts( String.valueOf( verCode ) );
+                            // Notify DataChanged...
+                            dialog.dismiss();
+                            if (HomeFragment.homePageAdaptor != null)
+                                HomeFragment.homePageAdaptor.notifyDataSetChanged();
+                            showToast( "Added Successfully!" );
+                            finish();
+                        }else{
+                            showToast( "Process failed!" );
+                            dialog.dismiss();
+                        }
+                    }
+                } );
+    }
+
     // CollectionID : CAT_ID
     // Documents ID : layout_id
     // Updates...
@@ -1162,7 +1254,6 @@ public class AddNewProductActivity extends AppCompatActivity {
                                             new ArrayList <ProductModel>() ) );
      */
      /*
-
     < List>
         List<HomeCatListModel> homeCatListModelList
         catID

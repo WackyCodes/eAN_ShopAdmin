@@ -139,7 +139,7 @@
                     android:textSize="12sp"
                     android:padding="4dp"
                     android:paddingLeft="8dp"
-                    android:text="Click Product ID : "/>
+                    android:text="Enter Product ID : "/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -147,18 +147,16 @@
                     android:gravity="center"
                     android:layout_weight="1"
                     android:orientation="horizontal">
-                    <TextView
+                    <EditText
                         android:id="@+id/banner_product_id_text"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:singleLine="true"
-                        android:maxLines="2"
+                        android:maxLines="1"
                         android:padding="2dp"
                         android:background="@drawable/back_no_back_color_1dp_border"
                         android:backgroundTint="@color/colorPrimary"
-                        android:drawableRight="@drawable/ic_content_paste_black_24dp"
-                        android:drawableTint="@color/colorPrimary"
                         android:hint="Product ID"
                         android:textColor="@color/colorPrimary"/>
                     <TextView

@@ -12,7 +12,7 @@ public class StaticValues {
     public static final String DEFAULT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_CODE = "BHOPAL";
-    public static String SHOP_ID = "462019274";
+    public static String SHOP_ID ;
     public static String SHOP_NAME = "An shop";
 
     public static final AdminDataModel ADMIN_DATA_MODEL = new AdminDataModel();

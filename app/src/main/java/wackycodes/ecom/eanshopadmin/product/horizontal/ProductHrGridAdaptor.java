@@ -18,7 +18,7 @@ import com.bumptech.glide.request.RequestOptions;
 import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.R;
-import wackycodes.ecom.eanshopadmin.addnew.AddNewProductActivity;
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.productview.ProductDetails;
 

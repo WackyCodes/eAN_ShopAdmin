@@ -6,10 +6,24 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Environment;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import java.io.BufferedReader;
+import java.io.CharArrayReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.nio.CharBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -86,19 +100,19 @@ public class StaticMethods {
         return randNum;
     }
 
-    public static String getRandomShopId(Context context){
-        String shopId = "";
-        if ( CURRENT_CITY_CODE.equals( "BHOPAL" ) ){
-            shopId = "4620" + getFiveDigitRandom();
-            return shopId;
-        }else if ( CURRENT_CITY_CODE.equals( "INDORE" ) ){
-            shopId = "4520" + getFiveDigitRandom();
-            return shopId;
-        }else{
-            Toast.makeText( context, "City not registered yet!", Toast.LENGTH_SHORT ).show();
-            return shopId;
-        }
-    }
+//    public static String getRandomShopId(Context context){
+//        String shopId = "";
+//        if ( CURRENT_CITY_CODE.equals( "BHOPAL" ) ){
+//            shopId = "4620" + getFiveDigitRandom();
+//            return shopId;
+//        }else if ( CURRENT_CITY_CODE.equals( "INDORE" ) ){
+//            shopId = "4520" + getFiveDigitRandom();
+//            return shopId;
+//        }else{
+//            Toast.makeText( context, "City not registered yet!", Toast.LENGTH_SHORT ).show();
+//            return shopId;
+//        }
+//    }
 
     public static String getRandomProductId(Context context){
         String productId = SHOP_ID.substring( 4 ) + getFiveDigitRandom();
@@ -124,6 +138,86 @@ public class StaticMethods {
         return stringBuffer.toString();
     }
 
+    public static void writeFileInLocal(@NonNull Context context, String fileName, String textMsg){
+        try {
+//            FileOutputStream fileOS = openFileOutput( fileName, MODE_PRIVATE );
+//            OutputStreamWriter outputStreamWriter = new OutputStreamWriter( fileOS );
+//            outputStreamWriter.write( textMsg );
+//            outputStreamWriter.close();
+            File folder1 = new File(context.getExternalFilesDir( Environment.getExternalStorageDirectory().getAbsolutePath() ), fileName);
+            folder1.mkdirs();
+            File pdfFile = new File(folder1, fileName + ".txt");
+//            InputStream inputStream = urlConnection.getInputStream();
+            FileOutputStream fileOutputStream = new FileOutputStream( pdfFile );
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter( fileOutputStream );
+            outputStreamWriter.write( textMsg );
+            outputStreamWriter.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String readFileFromLocal( @NonNull Context context, String fileName, boolean isChecked){
+        StringBuilder fileValue = null;
+        File file = new File( context.getExternalFilesDir( Environment.getExternalStorageDirectory().getAbsolutePath() ) + "/" + fileName + "/" + fileName + ".txt" );
+        if (file.exists()){
+            try {
+                FileReader fileReader = new FileReader( file );
+                while((fileReader.read( ))!= -1){
+                    if (fileValue != null){
+                        fileValue.append( (char) fileReader.read() );
+                    }else{
+                        fileValue = new StringBuilder( String.valueOf( (char) fileReader.read() ) );
+                    }
+                }
+
+                return fileValue.toString().trim();
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }else{
+            return null;
+        }
+    }
+
+
+    public static String readFileFromLocal( Context context, String fileName ){
+        String msg = null;
+        try {
+            File file = new File( context
+                    .getExternalFilesDir( Environment.getExternalStorageDirectory().getAbsolutePath() ), fileName + "/"+ fileName + ".txt");
+            if (file.exists()){
+                FileInputStream fileIS = new FileInputStream( file );
+//            FileInputStream fileIS = openFileInput( fileName );
+                InputStreamReader inputStreamReader = new InputStreamReader( fileIS );
+                char[] inputBuffer = new char[100];
+                int charRead;
+                while(( charRead = inputStreamReader.read( inputBuffer )) > 0){
+                    String readString = String.copyValueOf( inputBuffer, 0, charRead );
+                    if (msg != null){
+                        msg += readString;
+                    }else{
+                        msg = readString;
+                    }
+                }
+                inputStreamReader.close();
+            }
+
+        }catch (Exception e){
+            showToast( context, e.getMessage() );
+        }finally{
+            return msg;
+        }
+    }
 
     /*
         // TODO : List...

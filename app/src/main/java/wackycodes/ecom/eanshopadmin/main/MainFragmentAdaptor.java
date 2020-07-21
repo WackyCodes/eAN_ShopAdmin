@@ -12,7 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import wackycodes.ecom.eanshopadmin.R;
-import wackycodes.ecom.eanshopadmin.addnew.AddNewProductActivity;
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.home.HomeActivity;
 
 import static wackycodes.ecom.eanshopadmin.main.MainFragment.mainPageList;

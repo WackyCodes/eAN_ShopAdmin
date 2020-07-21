@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -29,15 +28,16 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.other.CheckInternetConnection;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
+import wackycodes.ecom.eanshopadmin.product.specifications.ProductDetailsSpecificationModel;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_EGG;
@@ -232,12 +232,53 @@ public class ProductDetails extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         int id = item.getItemId();
-        if ((item.getItemId() == android.R.id.home)){
+        if (id == android.R.id.home){
             finish();
             return true;
         }
 
-        return super.onOptionsItemSelected( item );
+        if (id == R.id.menu_add_another_varient){
+            // Add Another Version....
+            Intent addProduct = new Intent( this, AddNewProductActivity.class );
+
+            addProduct.putExtra( "CAT_INDEX", crrShopCatIndex );
+            addProduct.putExtra( "LAY_INDEX", layoutIndex );
+            addProduct.putExtra( "UPDATE", true );
+            addProduct.putExtra( "PRO_INDEX", productIndex );
+            startActivity( addProduct );
+            return true;
+        }else
+        if (id == R.id.menu_stock_update){
+
+        }else
+        if (id == R.id.menu_price_update){
+
+        }else
+        if (id == R.id.menu_cod_update){
+
+        }else
+        if (id == R.id.menu_edit_name){
+
+        }else
+        if (id == R.id.menu_edit_details){
+
+        }else
+        if (id == R.id.menu_update_images){
+
+        }else
+        if (id == R.id.menu_update_specifications){
+
+        }else
+        if (id == R.id.menu_remove_products){
+
+        }
+//        else
+//        if (id == R.id.menu_update_images){
+//
+//        }
+
+
+            return super.onOptionsItemSelected( item );
     }
 
 

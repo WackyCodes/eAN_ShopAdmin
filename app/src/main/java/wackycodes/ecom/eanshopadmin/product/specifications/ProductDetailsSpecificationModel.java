@@ -1,4 +1,4 @@
-package wackycodes.ecom.eanshopadmin.product.productview;
+package wackycodes.ecom.eanshopadmin.product.specifications;
 
 public class ProductDetailsSpecificationModel {
     public static final int PRODUCT_SPECIFICATION_TITLE = 0;

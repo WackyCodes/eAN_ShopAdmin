@@ -21,6 +21,7 @@ import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.other.CheckInternetConnection;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
+import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 import wackycodes.ecom.eanshopadmin.other.StaticValues;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.currentUser;
@@ -71,8 +72,19 @@ public class WelcomeActivity extends AppCompatActivity {
 //        DBQuery.getCityListQuery(); // Not Required!
         // Load Shop List.. > In main Activity...
         if (currentUser != null){
-            checkAdminPermission();
-            // TODO : Read Data from Local File... and Assign in  The static variables...
+            String userMobile = StaticMethods.readFileFromLocal(this, "mobile" );
+            String shopID = StaticMethods.readFileFromLocal(this, "shop" );
+
+            if (userMobile != null && shopID != null){
+                SHOP_ID = shopID.trim();
+                ADMIN_DATA_MODEL.setAdminMobile( userMobile.trim() );
+                checkAdminPermission();
+                showToast( "Mobile : "+ ADMIN_DATA_MODEL.getAdminMobile() + " \n ID: "+ SHOP_ID );
+            }else{
+                firebaseAuth.signOut();
+                startActivity( new Intent( WelcomeActivity.this, AuthActivity.class ) );
+                finish();
+            }
 
         }else{
             startActivity( new Intent( WelcomeActivity.this, AuthActivity.class ) );
@@ -81,31 +93,44 @@ public class WelcomeActivity extends AppCompatActivity {
 
     }
 
+    int round = 0;
     private void checkAdminPermission(  ){
         firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
-                .collection( "ADMINS" ).document( "7999597410" )
+                .collection( "ADMINS" ).document( ADMIN_DATA_MODEL.getAdminMobile() )
                 .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                 if (task.isSuccessful()){
+                    DocumentSnapshot documentSnapshot = task.getResult();
+//                    boolean is_allowed = (boolean)task.getResult().get( "is_allowed" );
+                    if ( documentSnapshot.get( "is_allowed" )!= null &&  (boolean)documentSnapshot.get( "is_allowed" )){
+//                        String admin_address = task.getResult().get( "admin_address" ).toString();
+                        String admin_email = documentSnapshot.get( "admin_email" ).toString();
+                        String admin_code = documentSnapshot.get( "admin_code" ).toString();
+                        String admin_name = documentSnapshot.get( "admin_name" ).toString();
+                        String admin_photo = documentSnapshot.get( "admin_photo" ).toString();
 
-//                    Boolean is_root_admin = task.getResult().getBoolean( "is_root_admin" );
-//                    int admin_code = Integer.parseInt( task.getResult().get( "admin_code" ).toString() );
-//                    String current_city_code = task.getResult().get( "current_city_code" ).toString();
-//                    String current_city_name = task.getResult().get( "current_city_name" ).toString();
-                    Intent intent = new Intent( WelcomeActivity.this, MainActivity.class );
-                    startActivity( intent );
-                    finish();
-//                    if (is_root_admin){
-//                        // Forward to home page...
-//                        ADMIN_DATA_MODEL.setAdminCode( admin_code );
-//                        CURRENT_CITY_CODE = current_city_code;
-//                        CURRENT_CITY_NAME = current_city_name;
-//
-//                    }else{
-//                        // SignOut...
-//                        deniedDialog();
-//                    }
+                        ADMIN_DATA_MODEL.setAdminEmail( admin_email );
+                        ADMIN_DATA_MODEL.setAdminCode( Integer.parseInt( admin_code ) );
+                        ADMIN_DATA_MODEL.setAdminName( admin_name );
+                        ADMIN_DATA_MODEL.setAdminPhoto( admin_photo );
+                        Intent intent = new Intent( WelcomeActivity.this, MainActivity.class );
+                        startActivity( intent );
+                        finish();
+
+                    }else{
+                        if (documentSnapshot.get( "is_allowed" )== null){
+                            if (round < 3)
+                                checkAdminPermission();
+                            else{
+                                showToast( "Loading Failed!" );
+                                finish();
+                            }
+                            round++;
+                        }else{
+                            deniedDialog();
+                        }
+                    }
                 }else{
                     deniedDialog();
                 }

@@ -7,13 +7,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +43,7 @@ import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.addnew.AddNewImageActivity;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.home.bannerslider.BannerSliderAdaptor;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
@@ -52,8 +57,10 @@ import wackycodes.ecom.eanshopadmin.product.horizontal.ProductHrGridAdaptor;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
+import static wackycodes.ecom.eanshopadmin.other.StaticMethods.getTwoDigitRandom;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_CODE;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.GALLERY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
@@ -301,7 +308,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
         }
 
         private void setData(final String layoutID, List<BannerModel> catList, final int index ){
-            SetCategoryItem setCategoryItem = new SetCategoryItem( catList );
+            SetCategoryItem setCategoryItem = new SetCategoryItem( catList, index );
             gridLayout.setAdapter( setCategoryItem );
             setCategoryItem.notifyDataSetChanged();
             this.layoutID = layoutID;
@@ -352,8 +359,10 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
         private class SetCategoryItem extends BaseAdapter {
             List<BannerModel> categoryTypeModelList;
-            public SetCategoryItem(List <BannerModel> categoryTypeModelList) {
+            int index;
+            public SetCategoryItem(List <BannerModel> categoryTypeModelList, int index) {
                 this.categoryTypeModelList = categoryTypeModelList;
+                this.index = index;
             }
 
             @Override
@@ -375,9 +384,13 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             @Override
             public View getView(final int position, View convertView, final ViewGroup parent) {
                 View view = LayoutInflater.from( parent.getContext() ).inflate( R.layout.square_category_layout_item, null );
+                LinearLayout updateLayout = view.findViewById( R.id.sq_update_layout );
+                TextView updateImage = view.findViewById( R.id.sq_update_image );
+                TextView updateName = view.findViewById( R.id.sq_update_text );
                 if (position < categoryTypeModelList.size()){
                     ImageView itemImage = view.findViewById( R.id.sq_image_view );
                     TextView itemName =  view.findViewById( R.id.sq_text_view );
+                    updateLayout.setVisibility( View.VISIBLE );
 //                itemImage.setImageResource( Integer.parseInt( categoryTypeModelList.get( position ).getCatImage() ) );
                     Glide.with( itemView.getContext() ).load( categoryTypeModelList.get( position ).getImageLink() )
                             .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( itemImage );
@@ -389,8 +402,31 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                             onCategoryClick( parent.getContext(), categoryTypeModelList.get( position ).getClickID() );
                         }
                     } );
+
+                    // Update...
+                    updateName.setOnClickListener( new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dialogForCategory( parent.getContext(), position, categoryTypeModelList.get( position ).getNameOrExtraText(), false  );
+                        }
+                    } );
+                    updateImage.setOnClickListener( new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // : Update Image....
+                            Intent intent = new Intent( parent.getContext(), AddNewImageActivity.class );
+                            intent.putExtra( "CAT_ID", categoryTypeModelList.get( position ).getClickID() );
+                            intent.putExtra( "LAY_ID", layoutID );
+                            intent.putExtra( "CAT_NO", position );
+                            intent.putExtra( "LOCAL_CAT_INDEX", catIndex );
+                            intent.putExtra( "LOCAL_LAY_INDEX", index );
+                            parent.getContext().startActivity( intent );
+                        }
+                    } );
+
                     return view;
                 }else{
+                    updateLayout.setVisibility( View.INVISIBLE );
                     ImageView itemImage = view.findViewById( R.id.sq_image_view );
                     TextView itemName =  view.findViewById( R.id.sq_text_view );
                     itemImage.setImageResource( R.drawable.ic_add_black_24dp );
@@ -401,8 +437,8 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                     itemImage.setOnClickListener( new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            // TODO: Add New...
-                            showToast( "Code Not Found!", parent.getContext() );
+//                            showToast( "Code Not Found!", parent.getContext() );
+                            dialogForCategory( parent.getContext(), categoryTypeModelList.size()+1, null, true  );
                         }
                     } );
                     return view;
@@ -422,7 +458,91 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                     tempIndex++;
                 }
             }
+
+            private void dialogForCategory(Context context, final int catNo,@Nullable String updateCatName, final boolean isNew ){
+                final Dialog progressDialog = new Dialog( context );
+                progressDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
+                progressDialog.setContentView( R.layout.dialog_single_edit_text );
+                progressDialog.setCancelable( false );
+                progressDialog.getWindow().setLayout( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+
+                TextView  dTitle = progressDialog.findViewById( R.id.dialog_title );
+                final EditText dEditText = progressDialog.findViewById( R.id.dialog_editText );
+                Button  dOkBtn = progressDialog.findViewById( R.id.dialog_ok_btn );
+                Button  dCancelBtn = progressDialog.findViewById( R.id.dialog_cancel_btn );
+
+                dTitle.setText( "Enter Category Name" );
+                if (isNew){
+                    dEditText.setHint( "Category Name" );
+                    dOkBtn.setText( "Add" );
+                }else{
+                    dEditText.setText( updateCatName );
+                    dOkBtn.setText( "Update" );
+                }
+
+                dOkBtn.setOnClickListener( new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (TextUtils.isEmpty( dEditText.getText().toString() )){
+                            dEditText.setError( "Required!" );
+                        }else if (isValidName(dEditText)){
+                            dialog.show();
+                            Map<String, Object> uploadMap = new HashMap <>();
+                            if (isNew){
+                                String catID = getNewCatID(dEditText.getText().toString());
+                                categoryTypeModelList.add( new BannerModel(
+                                        // Add in Local List...
+                                        -1, catID,"",  dEditText.getText().toString(),
+                                        "delete ID" ) );
+                                // new
+                                uploadMap.put( "no_of_cat", catNo );
+                                uploadMap.put( "cat_id_"+catNo, catID );
+                                uploadMap.put( "cat_image_"+catNo, "" );
+                                uploadMap.put( "cat_name_"+catNo, dEditText.getText().toString() );
+                                uploadMap.put( "cat_delete_id_"+catNo, catID );
+
+                            }else{
+                                categoryTypeModelList.get( catNo).setNameOrExtraText( dEditText.getText().toString() );
+                                uploadMap.put( "cat_name_" + (catNo+1) , dEditText.getText().toString() );
+                            }
+                            // Request...
+                            updateOnDocument(dialog, layoutID, uploadMap);
+                            progressDialog.dismiss();
+                        }
+                    }
+                } );
+                dCancelBtn.setOnClickListener( new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        progressDialog.dismiss();
+                    }
+                } );
+                progressDialog.show();
+            }
+
         }
+
+        private String getNewCatID(String catName){
+            if (catName.length() <= 5 ){
+                catName = catName.toUpperCase().replace( " ", "" )+ "_" + getTwoDigitRandom();
+                return catName;
+            }else{
+                catName = catName.toUpperCase().replace( " ", "" );
+                return catName.trim();
+            }
+        }
+
+        private boolean isValidName( EditText editText){
+            String catName = editText.getText().toString();
+            if (catName.toUpperCase().equals( "HOME" ) || catName.toUpperCase().equals( "ADMINS" ) || catName.toUpperCase().equals( "ORDERS" ) ||
+                    catName.toUpperCase().equals( "PRODUCTS" ) || catName.toUpperCase().equals( "NOTIFICATIONS" )){
+                editText.setError( "This Name reserved!" );
+                return false;
+            }else{
+                return true;
+            }
+        }
+
 
     }
     //==============  GridProduct Grid Layout View Holder =================

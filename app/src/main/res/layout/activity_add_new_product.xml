@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".addnew.AddNewProductActivity">
+    tools:context=".addnew.newproduct.AddNewProductActivity">
 
     <TextView
         android:id="@+id/sample_heading"
@@ -473,6 +473,7 @@
 
                 <!-- Veg/Non/Others  ... -->
                 <LinearLayout
+                    android:id="@+id/new_pro_label_vegan_sample_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/back_white_05dp_primary_4dp_layout"
@@ -518,6 +519,7 @@
                 android:orientation="vertical">
                 <!-- Product Details....-->
                 <TextView
+                    android:id="@+id/new_pro_details_sample_textview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingLeft="10dp"

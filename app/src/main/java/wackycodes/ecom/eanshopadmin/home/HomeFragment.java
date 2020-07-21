@@ -1,29 +1,56 @@
 package wackycodes.ecom.eanshopadmin.home;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.addnew.AddNewLayoutActivity;
+import wackycodes.ecom.eanshopadmin.other.UpdateImages;
 
+import static android.app.Activity.RESULT_OK;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
+import static wackycodes.ecom.eanshopadmin.other.StaticMethods.getTwoDigitRandom;
+import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.BANNER_SLIDER_CONTAINER_ITEM;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.GALLERY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_STRIP_AD_CONTAINER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
@@ -56,11 +83,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private LinearLayout addNewStripAdLayoutBtn; // add_strip_ad_layout_LinearLay
     private ImageView closeAddLayout; //close_add_layout
 
+    private Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate( R.layout.fragment_home, container, false );
+        context = view.getContext();
 
         homeFragmentFrame = view.findViewById( R.id.home_fragment_frame_layout );
         homeFragmentSwipeRefresh = view.findViewById( R.id.home_fragment_swipe_refresh_layout );
@@ -96,13 +125,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         } );
 
-
         // Add Layout...
         addNewLayoutBtn =  view.findViewById( R.id.add_new_layout );
         dialogAddLayout =  view.findViewById( R.id.dialog_add_layout );
 //        newBannerSliderContainer =  view.findViewById( R.id.add_banner_slider_layout );
 //        newGridLayoutContainer =  view.findViewById( R.id.add_grid_layout );
-//        newStripAdLayout =  view.findViewById( R.id.add_strip_ad_layout );
+//        newStripAdLayout = view.findViewById( R.id.add_strip_ad_layout );
         addNewBannerSliderBtn =  view.findViewById( R.id.add_banner_slider_layout_LinearLay );
         addNewProductHrLayBtn =  view.findViewById( R.id.add_horizontal_layout_LinearLay );
         addNewGirdLayoutBtn =  view.findViewById( R.id.add_grid_layout_LinearLay );

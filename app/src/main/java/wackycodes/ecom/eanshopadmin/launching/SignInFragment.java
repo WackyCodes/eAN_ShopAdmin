@@ -5,12 +5,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.text.Editable;
 import android.text.TextUtils;
@@ -23,6 +25,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,19 +34,24 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.database.AdminQuery;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
+import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.currentUser;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 
 public class SignInFragment extends Fragment {
 
@@ -66,6 +74,10 @@ public class SignInFragment extends Fragment {
 
     private Button signInUpBtn;
     //---------
+
+    private ScrollView signInUpScrollView;
+    private LinearLayout shopSetUpLayout;
+    private TextView homePageSetupBtn;
 
     public SignInFragment() {
         // Required empty public constructor
@@ -97,6 +109,13 @@ public class SignInFragment extends Fragment {
 
         signInUpBtn = view.findViewById( R.id.sign_in_up_btn );
 
+        // After SignUp SignIn...
+        signInUpScrollView = view.findViewById( R.id.sign_in_up_scroll_view );
+        shopSetUpLayout = view.findViewById( R.id.home_page_set_up_layout );
+        homePageSetupBtn = view.findViewById( R.id.home_page_set_up_text );
+        signInUpScrollView.setVisibility( View.VISIBLE );
+        shopSetUpLayout.setVisibility( View.GONE );
+
         // Default Visibility...
         verifyShop.setVisibility( View.GONE );
         signInPassword.setVisibility( View.GONE );
@@ -119,7 +138,7 @@ public class SignInFragment extends Fragment {
                                 adminLogIn( view.getContext(), adminEmail, signInPassword.getText().toString());
                             }else{
                                 // Sign In... Authenticate...
-                                adminSignIn( adminEmail, signUpPass1.getText().toString() );
+                                adminSignIn( view.getContext(), adminEmail, signUpPass1.getText().toString() );
                             }
                         }else{
                             dialog.dismiss();
@@ -160,8 +179,18 @@ public class SignInFragment extends Fragment {
             }
         } );
 
+
+        homePageSetupBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Set Up Home Page....
+                setFragment( new ShopSetUpFragment() );
+            }
+        } );
+
         return view;
     }
+
 
     private void textWatcher(final View view){
         // Shop ID text Watcher...
@@ -327,8 +356,13 @@ public class SignInFragment extends Fragment {
                             if (documentSnapshot.get( "auth_id" ) != null){
                                 // Show Pass...
                                 adminEmail = documentSnapshot.get( "admin_email" ).toString();
-                                isAuth = true;
-                                setVisibility( true );
+                                if (documentSnapshot.get( "auth_id" ).toString() != null ){
+                                    setVisibility( true );
+                                    isAuth = true;
+                                }else{
+                                    isAuth = false;
+                                    setVisibility( false );
+                                }
                             }else{
                                 // Show Create Pass..
                                 adminEmail = documentSnapshot.get( "admin_email" ).toString();
@@ -357,8 +391,10 @@ public class SignInFragment extends Fragment {
                             // Assign Current User...
                             currentUser = firebaseAuth.getCurrentUser();
                             // Success...
+                            // Write in Local file
+                            writeDataInLocal( context, signInShopID.getText().toString().trim(), signInMobile.getText().toString() );
                             // Go to Next Activity...
-                            loadAdminDetails( signInShopID.getText().toString().trim(), signInMobile.getText().toString() );
+                            checkAdminPermission( context );
                         }else{
                             dialog.dismiss();
                             showToast( context, "Something Went Wrong!" );
@@ -366,9 +402,8 @@ public class SignInFragment extends Fragment {
                     }
                 } );
     }
-
     // Authenticate...
-    private void adminSignIn(String email, String password){
+    private void adminSignIn( final Context context, String email, String password){
         firebaseAuth.createUserWithEmailAndPassword( email, password )
                 .addOnCompleteListener( new OnCompleteListener <AuthResult>() {
                     @Override
@@ -380,8 +415,10 @@ public class SignInFragment extends Fragment {
                             Map<String, Object> updateMap = new HashMap <>();
                             updateMap.put( "auth_id", firebaseAuth.getCurrentUser().getUid() );
                             AdminQuery.updateAdminData( null, null, signInShopID.getText().toString(), signInMobile.getText().toString(), updateMap );
+                            // Write in Local file
+                            writeDataInLocal( context, signInShopID.getText().toString().trim(), signInMobile.getText().toString() );
                             // Add More Details...
-                            addMoreDetailsOfAdmin();
+                            checkAdminPermission( context );
                         }else{
                             currentUser = null;
                         }
@@ -389,18 +426,52 @@ public class SignInFragment extends Fragment {
                 } );
     }
 
-    private void loadAdminDetails(String shopID, String mobile){
-        // Load...:
-        dialog.dismiss();
-        AdminQuery.loadAdminData( null, null, shopID, mobile );
-        showToast( getContext(), "Code Not Found!" );
+    private void checkAdminPermission( final Context context ){
+        firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "ADMINS" ).document( ADMIN_DATA_MODEL.getAdminMobile() )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    Boolean is_allowed = task.getResult().getBoolean( "is_allowed" );
+                    if (is_allowed){
+//                        String admin_address = task.getResult().get( "admin_address" ).toString();
+                        String admin_email = task.getResult().get( "admin_email" ).toString();
+                        String admin_code = task.getResult().get( "admin_code" ).toString();
+                        String admin_name = task.getResult().get( "admin_name" ).toString();
+                        String admin_photo = task.getResult().get( "admin_photo" ).toString();
+
+                        ADMIN_DATA_MODEL.setAdminEmail( admin_email );
+                        ADMIN_DATA_MODEL.setAdminCode( Integer.parseInt( admin_code ) );
+                        ADMIN_DATA_MODEL.setAdminName( admin_name );
+                        ADMIN_DATA_MODEL.setAdminPhoto( admin_photo );
+
+                        checkForSetUp( context );
+
+                    }
+                    else{
+                        deniedDialog();
+                        dialog.dismiss();
+                    }
+
+                }else{
+                    deniedDialog();
+                    dialog.dismiss();
+                }
+            }
+        } );
+
     }
 
-    private void addMoreDetailsOfAdmin(){
-        // TODO:
-        dialog.dismiss();
-        setVisibility(true);
-        showToast( getContext(), "Code Not Found!" );
+    private void deniedDialog(){
+        firebaseAuth.signOut();
+        DialogsClass.alertDialog( getContext(), "Permission denied!", "You have not permission to use this app." );
+    }
+    private void writeDataInLocal(Context context, String shopID, String mobile){
+        SHOP_ID = shopID;
+        ADMIN_DATA_MODEL.setAdminMobile( mobile );
+        StaticMethods.writeFileInLocal( context, "shop", shopID);
+        StaticMethods.writeFileInLocal( context, "mobile", mobile );
     }
 
     // Forget Password Method...
@@ -423,5 +494,42 @@ public class SignInFragment extends Fragment {
                 });
     }
 
+    private void checkForSetUp(final Context context){
+        firebaseFirestore
+                .collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "HOME" )
+                .addSnapshotListener( new EventListener <QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (queryDocumentSnapshots != null){
+                            if (queryDocumentSnapshots.isEmpty()){
+                                signInUpScrollView.setVisibility( View.GONE );
+                                shopSetUpLayout.setVisibility( View.VISIBLE );
+                                dialog.dismiss();
+                            }else{
+                              // GOTO MAIN activity...
+                                dialog.dismiss();
+                                Intent intent = new Intent( context, MainActivity.class );
+                                context.startActivity( intent );
+                                getActivity().finish();
+                            }
+                        }else{
+                            //
+                            dialog.dismiss();
+                            signInUpScrollView.setVisibility( View.GONE );
+                            shopSetUpLayout.setVisibility( View.VISIBLE );
+                        }
+                    }
+                } );
+    }
+
+    // Fragment Transaction...
+    public void setFragment( Fragment showFragment ){
+        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations( R.anim.slide_from_right, R.anim.slide_out_from_left );
+        parentFrameLayout.removeAllViews();
+        fragmentTransaction.replace( parentFrameLayout.getId(),showFragment );
+        fragmentTransaction.commit();
+    }
 
 }
