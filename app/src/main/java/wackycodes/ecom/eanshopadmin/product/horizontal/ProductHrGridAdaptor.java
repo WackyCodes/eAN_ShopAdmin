@@ -1,6 +1,8 @@
 package wackycodes.ecom.eanshopadmin.product.horizontal;
 
+import android.content.ClipData;
 import android.content.Intent;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,9 +25,12 @@ import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.productview.ProductDetails;
 
+import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_GRID_LAYOUT;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_HORIZONTAL_LAYOUT;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_PRODUCT_SEARCH_LAYOUT;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_RECTANGLE_LAYOUT;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.clipboardManager;
 
 public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.ViewHolder> {
 
@@ -49,6 +55,8 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
                 return VIEW_RECTANGLE_LAYOUT;
             case VIEW_GRID_LAYOUT:
                 return VIEW_GRID_LAYOUT;
+            case VIEW_PRODUCT_SEARCH_LAYOUT:
+                return VIEW_PRODUCT_SEARCH_LAYOUT;
             default:
                 return -1;
         }
@@ -58,24 +66,49 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // TODO : Case...
-        View hrView = LayoutInflater.from( parent.getContext() ).inflate( R.layout.product_square_layout_item, parent, false );
-        return new HomeHorizontalViewHolder( hrView );
+        switch (viewType){
+            case VIEW_HORIZONTAL_LAYOUT:
+            case VIEW_RECTANGLE_LAYOUT:
+            case VIEW_GRID_LAYOUT:
+                View hrView = LayoutInflater.from( parent.getContext() ).inflate( R.layout.product_square_layout_item, parent, false );
+                return new HomeHorizontalViewHolder( hrView );
+            case VIEW_PRODUCT_SEARCH_LAYOUT:
+                View searchView = LayoutInflater.from( parent.getContext() ).inflate( R.layout.product_rectanle_view_item, parent, false );
+                return new RectangleViewHolder( searchView );
+            default:
+                return null;
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        if (position < productModelList.size()){
-            // TODO : Case...
-            String productId = productModelList.get( position ).getpProductID();
-            List<String> imgLink = productModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
-            String name = productModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
-            String price = productModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
-            String cutPrice = productModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
-
-            ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, position );
-        }else{
-            ((HomeHorizontalViewHolder) holder).setAddNewProductView();
+        switch (viewType){
+            case VIEW_HORIZONTAL_LAYOUT:
+            case VIEW_RECTANGLE_LAYOUT:
+            case VIEW_GRID_LAYOUT:
+                // Square View....
+                if (position < productModelList.size()){
+                    String productId = productModelList.get( position ).getpProductID();
+                    List<String> imgLink = productModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
+                    String name = productModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
+                    String price = productModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
+                    String cutPrice = productModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
+                    // TODO : Case...
+                    ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, position );
+                }else{
+                    ((HomeHorizontalViewHolder) holder).setAddNewProductView();
+                }
+                break;
+            case VIEW_PRODUCT_SEARCH_LAYOUT:
+                String productId = productModelList.get( position ).getpProductID();
+                List<String> imgLink = productModelList.get( position ).getProductSubModelList().get( 0 ).getpImage();
+                String name = productModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
+                String price = productModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
+                String cutPrice = productModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
+                ((RectangleViewHolder) holder).setData( productId, imgLink,  name, price, cutPrice, "",
+                        productModelList.get( position ).getProductSubModelList().get( 0 ).getpStocks(), position );
+                break;
         }
 
     }
@@ -165,6 +198,87 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
 
     }
 
+    public class RectangleViewHolder extends RecyclerView.ViewHolder{
+
+        ImageView productImage;
+        TextView productName;
+        TextView productPrice;
+        TextView productCutPrice;
+        TextView productOffPercentage;
+        TextView productStockInfo;
+
+        TextView productIDText;
+        TextView addProductBtn;
+        ImageView copyIDBtn;
+
+        public RectangleViewHolder(@NonNull View itemView) {
+            super( itemView );
+            productImage = itemView.findViewById( R.id.hr_viewAll_product_image );
+            productName = itemView.findViewById( R.id.hr_viewAll_product_name );
+            productPrice = itemView.findViewById( R.id.hr_viewAll_product_price );
+            productCutPrice = itemView.findViewById( R.id.hr_viewAll_product_cut_price );
+            productOffPercentage = itemView.findViewById( R.id.hr_viewAll_product_off_per );
+            productStockInfo = itemView.findViewById( R.id.hr_viewAll_product_stock_info );
+
+            productIDText = itemView.findViewById( R.id.product_id_text );
+            addProductBtn = itemView.findViewById( R.id.product_add_text_view );
+            copyIDBtn = itemView.findViewById( R.id.product_id_copy_img_view );
+        }
+
+        private void setData(final String productID, List<String> imageLink, String pName, String pPrice, String pMRP, String pOffPer, String pStocks, final int index ){
+
+            Glide.with( itemView.getContext() ).load( imageLink.get( 0 ) ).apply( new RequestOptions()
+                    .placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
+
+            productName.setText( pName );
+            productPrice.setText( "Rs." + pPrice + "/-" );
+            productCutPrice.setText( "Rs." + pMRP + "/-" );
+            productIDText.setText( productID );
+
+            if (Integer.parseInt( pStocks ) > 0) {
+                productStockInfo.setText( "in Stock ("+ pStocks + ")" );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    productStockInfo.setBackgroundTintList( itemView.getResources().getColorStateList( R.color.colorGreen ) );
+                }
+
+            } else {
+                productStockInfo.setText( "Out of Stock" );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    productStockInfo.setBackgroundTintList( itemView.getResources().getColorStateList( R.color.colorRed ) );
+                }
+            }
+
+            // Copy Id....
+            copyIDBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO : Copy...
+                    // Text ..
+                    ClipData clipData = ClipData.newPlainText( "TEXT", productID );
+                    clipboardManager.setPrimaryClip( clipData );
+                    showToast( itemView.getContext(), "Copied!");
+                    // TO ACCESS THE DATA...
+        //        if (clipboardManager.hasPrimaryClip()){
+        //            String data = clipboardManager.getPrimaryClip().getItemAt( 0 ).getText().toString();
+        //        }
+                }
+            } );
+
+            // Product Click...
+            itemView.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
+                    productDetailIntent.putExtra( "PRODUCT_ID", productID );
+                    productDetailIntent.putExtra( "PRODUCT_INDEX", index );
+
+                }
+            } );
+
+        }
+
+    }
 
 }
 

@@ -33,10 +33,12 @@ import java.util.List;
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
+import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.other.CheckInternetConnection;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
+import wackycodes.ecom.eanshopadmin.product.search.ProductSearchActivity;
 import wackycodes.ecom.eanshopadmin.product.specifications.ProductDetailsSpecificationModel;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
@@ -90,8 +92,8 @@ public class ProductDetails extends AppCompatActivity {
 
     private int currentVariant = 0;
 
-    private ProductModel pProductModel;
-
+    public static ProductModel pProductModel = null;
+    private Boolean isUpdateAllowed = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,32 +101,39 @@ public class ProductDetails extends AppCompatActivity {
         setContentView( R.layout.activity_product_details );
 
         productDetails = this;
+        pProductModel = null;
+        productImageList.clear();
 
-        Toolbar toolbar = findViewById( R.id.x_ToolBar );
-        setSupportActionBar( toolbar );
         // TODO : get product ID through Intent ...
         productID = getIntent().getStringExtra( "PRODUCT_ID" );
         crrShopCatIndex = getIntent().getIntExtra( "HOME_CAT_INDEX", -1 );
         layoutIndex = getIntent().getIntExtra( "LAYOUT_INDEX", -1 );
         productIndex = getIntent().getIntExtra( "PRODUCT_INDEX", -1 );
 
-        if (crrShopCatIndex != -1 && layoutIndex != -1){
+        if (productIndex != -1){
+            isUpdateAllowed = true;
             // This is for layout product click...
-            pProductModel = homeCatListModelList.get( crrShopCatIndex ).getHomeListModelList().get( layoutIndex ).getProductModelList().get( productIndex );
+            if (crrShopCatIndex != -1 && layoutIndex != -1 ){
+                // If User come from product Layout...
+                pProductModel = homeCatListModelList.get( crrShopCatIndex ).getHomeListModelList().get( layoutIndex ).getProductModelList().get( productIndex );
+            }else{
+                // If User Come From Searching Page....
+                pProductModel = ProductSearchActivity.searchProductList.get( productIndex );
+            }
+
         }else{
-            // This is for search activity...
-//            if (searchProductList.size() > 0)
-//                pProductModel = searchProductList.get( productIndex );
-//            else{
-//                showToast( "Product Not found!" );
-//                finish();
-//            }
+            // If User Come from Banner Click...
+            isUpdateAllowed = false;
+            // TODO: Reload The Product Details...
+
         }
 
         dialog = DialogsClass.getDialog( ProductDetails.this );
         dialog.show();
         // ---- Progress Dialog...
         // Set Title on Action Menu
+        Toolbar toolbar = findViewById( R.id.x_ToolBar );
+        setSupportActionBar( toolbar );
         try{
             // To test We assign a default PRODUCT_ID ...
             if (productID.isEmpty()){
@@ -133,8 +142,9 @@ public class ProductDetails extends AppCompatActivity {
                 Toast.makeText( this, "Product Not found.!", Toast.LENGTH_SHORT ).show();
                 finish();
             }
-            getSupportActionBar().setDisplayShowTitleEnabled( false );
+            getSupportActionBar().setDisplayShowTitleEnabled( true );
             getSupportActionBar( ).setDisplayHomeAsUpEnabled( true );
+            getSupportActionBar().setTitle( productID );
         }catch (NullPointerException e){
         }
 
@@ -189,7 +199,17 @@ public class ProductDetails extends AppCompatActivity {
         // Retrieve details from database...----------------
         getProductDetails();
         // SetData...
-        setProductData( 0 );
+        if (pProductModel != null){
+            setProductData( 0 );
+            setOtherDetails();
+        }
+
+        // Refresh Option Menu...
+        invalidateOptionsMenu();
+
+    }
+
+    private void setOtherDetails(){
         // set Product VegNon Veg...
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             setVegNonData();
@@ -214,26 +234,24 @@ public class ProductDetails extends AppCompatActivity {
         if(productVariantList.size() > 0){
             setWeightSpinner();
         }
-
-
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate( R.menu.menu_product_details_edit_options,menu);
-        MenuItem cartItem = menu.findItem( R.id.menu_add_another_varient );
-        // Check First whether any item in cart or not...
-        // if any item has in cart...
-
-        return true;
+        if (isUpdateAllowed){
+            getMenuInflater().inflate( R.menu.menu_product_details_edit_options,menu);
+            MenuItem cartItem = menu.findItem( R.id.menu_add_another_varient );
+            return true;
+        }else{
+            return false;
+        }
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         int id = item.getItemId();
         if (id == android.R.id.home){
-            finish();
+            onBackPressed();
             return true;
         }
 
@@ -281,7 +299,6 @@ public class ProductDetails extends AppCompatActivity {
             return super.onOptionsItemSelected( item );
     }
 
-
     private void showToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
@@ -300,7 +317,54 @@ public class ProductDetails extends AppCompatActivity {
                 public void onComplete(@NonNull Task <DocumentSnapshot> task) {
                     if (task.isSuccessful()){
                         DocumentSnapshot documentSnapshot = task.getResult();
-                        // Set other Details of  Product Details Image Layout.
+
+                        if (!isUpdateAllowed){
+                            /** Reload Model Data...*/
+                            if ( documentSnapshot.get( "p_no_of_variants" ) !=null ){
+//                            String[] pImage;
+                                int p_no_of_variants = Integer.valueOf( String.valueOf( (long) documentSnapshot.get( "p_no_of_variants" ) ) );
+                                List<ProductSubModel> productSubModelList = new ArrayList <>();
+                                for (int tempI = 1; tempI <= p_no_of_variants; tempI++){
+
+                                    // We can use Array...
+                                    ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
+                                    // add Data...
+                                    productSubModelList.add( new ProductSubModel(
+                                            task.getResult().get( "p_name_"+tempI).toString(),
+                                            Images,
+                                            task.getResult().get( "p_selling_price_"+tempI).toString(),
+                                            task.getResult().get( "p_mrp_price_"+tempI).toString(),
+                                            task.getResult().get( "p_weight_"+tempI).toString(),
+                                            task.getResult().get( "p_stocks_"+tempI).toString(),
+                                            task.getResult().get( "p_offer_"+tempI).toString()
+                                    ) );
+                                }
+                                String p_id = task.getResult().get( "p_id").toString();
+                                String p_main_name = task.getResult().get( "p_main_name" ).toString();
+//                        String p_main_image = task.getResult().get( "p_main_image" ).toString();
+                                String p_weight_type = task.getResult().get( "p_weight_type" ).toString();
+                                int p_veg_non_type = Integer.valueOf( task.getResult().get( "p_veg_non_type" ).toString() );
+                                Boolean p_is_cod = (Boolean) task.getResult().get( "p_is_cod" );
+
+                                pProductModel = new ProductModel(
+                                        p_id,
+                                        p_main_name,
+                                        " ",
+                                        p_is_cod,
+                                        String.valueOf(p_no_of_variants),
+                                        p_weight_type,
+                                        p_veg_non_type,
+                                        productSubModelList
+                                );
+
+                                // Set Product Data...
+                                setProductData( 0 );
+                                // Refresh Our other Details...
+                                setOtherDetails();
+
+                            }
+                        }
+                        // Set other Details of  Product Details Image Layout...
                       /**  if ((boolean)documentSnapshot.get( "use_tab_layout" )){
                             // use tab layout...
                             productDescriptionLayout.setVisibility( View.VISIBLE );

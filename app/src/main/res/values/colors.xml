@@ -22,6 +22,7 @@
     <color name="colorDarkYellow">#C49304</color>
     <color name="colorPink">#DE05C8</color>
     <color name="colorNoColor">#00FFFFFF</color>
+    <color name="colorCategory">#197969</color>
 
 
 </resources>

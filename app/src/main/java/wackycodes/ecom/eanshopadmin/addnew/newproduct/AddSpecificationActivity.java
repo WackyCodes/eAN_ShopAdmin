@@ -10,6 +10,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -26,24 +29,47 @@ import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
+import static wackycodes.ecom.eanshopadmin.product.productview.ProductDetails.pProductModel;
 
 public class AddSpecificationActivity extends AppCompatActivity {
 
-    public static List <AddSpecificationModel> specificationModelList = new ArrayList <>();
+    public static List <AddSpecificationModel> specificationModelList;
     public static AddSpecificationAdaptor specificationAdaptor;
 
     private EditText descriptionEditText;
     private RecyclerView specificationRecycler;
     private Button uploadBtn;
 
+    private ImageView homeBackBtn;
+    private TextView productIDText;
+    private TextView productVerText;
+    private Spinner proCopyFromSpinner;
+
+    //
+    private String productID;
+    private int productVerNo;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_add_specification );
 
+//        productID = getIntent().getStringExtra( "PRODUCT_ID" );
+        productVerNo = getIntent().getIntExtra( "PRODUCT_VER_NO", -1 );
+        // Get Product ID...
+        productID = pProductModel.getpProductID();
+        specificationModelList = pProductModel.getProductSubModelList().get( productVerNo ).getpSpecificationList();
+
         descriptionEditText = findViewById( R.id.new_pro_description_etext );
         specificationRecycler = findViewById( R.id.new_pro_specifications_recycler );
         uploadBtn = findViewById( R.id.upload_specification_btn );
+
+        // header....
+        homeBackBtn = findViewById( R.id.home_back_imageview );
+        productIDText = findViewById( R.id.pro_id_text );
+        productVerText = findViewById( R.id.pro_ver_no_text );
+        proCopyFromSpinner = findViewById( R.id.copy_from_spinner );
 
         /// Set Layout ...
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager( this );
@@ -53,6 +79,10 @@ public class AddSpecificationActivity extends AppCompatActivity {
         specificationAdaptor = new AddSpecificationAdaptor( specificationModelList );
         specificationRecycler.setAdapter( specificationAdaptor );
         specificationAdaptor.notifyDataSetChanged();
+
+        // set Header...
+        productIDText.setText( "Product ID : "+ productID );
+        productVerText.setText( "Ver : " + productVerNo );
 
         // Upload Button...
         uploadBtn.setOnClickListener( new View.OnClickListener() {
@@ -71,6 +101,18 @@ public class AddSpecificationActivity extends AppCompatActivity {
             }
         } );
 
+        homeBackBtn.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        } );
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 
     private boolean isListNotEmpty(){

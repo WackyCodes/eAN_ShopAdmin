@@ -47,9 +47,13 @@ public class MainFragment extends Fragment {
         // Home List...
         if (mainPageList.size() == 0){
             mainPageList.add( new MainFragmentModel( R.drawable.ic_home_black_24dp, "View Home", REQUEST_TO_VIEW_HOME ) );
-            mainPageList.add( new MainFragmentModel( R.drawable.ic_home_black_24dp, "Add New Shop", REQUEST_TO_ADD_SHOP ) );
-            mainPageList.add( new MainFragmentModel( R.drawable.ic_person_pin_circle_black_24dp, "View Profile", REQUEST_TO_VIEW_SHOP ) );
-            mainPageList.add( new MainFragmentModel( R.drawable.ic_home_black_24dp, "View Sample", REQUEST_TO_VIEW_SHOP ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_devices_black_24dp, "Order List", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_account_balance_black_24dp, "Income Records", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_assignment_black_24dp, "Selling Records", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_store_black_24dp, "My Shop", REQUEST_TO_VIEW_SHOP ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_stars_black_24dp, "Shop Rating", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_map_black_24dp, "Service Area", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_favorite_black_24dp, "Favorite Customers", -1 ) );
         }
 
         // Create and Set Adaptor...

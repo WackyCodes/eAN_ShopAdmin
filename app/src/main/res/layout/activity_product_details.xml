@@ -24,7 +24,7 @@
             android:background="@color/colorPrimary"
             android:scaleType="center"
             app:elevation="4dp"
-            android:theme="@style/ToolTheme"
+            android:theme="@style/ToolTheme1"
             app:titleMarginStart="40dp"
             app:titleTextColor="@color/colorWhite">
 

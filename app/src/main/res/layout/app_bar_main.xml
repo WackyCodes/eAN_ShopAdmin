@@ -26,7 +26,8 @@
             app:elevation="4dp"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:popupTheme="@style/ToolTheme"
-            app:titleMarginStart="40dp"
+            app:titleMarginStart="@dimen/default_gap"
+            app:subtitleTextColor="@color/colorWhite"
             app:titleTextColor="@color/colorWhite">
 
         </androidx.appcompat.widget.Toolbar>

@@ -446,6 +446,10 @@ public class SignInFragment extends Fragment {
                         ADMIN_DATA_MODEL.setAdminName( admin_name );
                         ADMIN_DATA_MODEL.setAdminPhoto( admin_photo );
 
+
+                        // Load Shop Data...
+                        DBQuery.getShopData( SHOP_ID );
+
                         checkForSetUp( context );
 
                     }

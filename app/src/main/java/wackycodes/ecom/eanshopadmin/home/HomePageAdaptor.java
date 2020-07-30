@@ -18,13 +18,17 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.gridlayout.widget.GridLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,8 +48,11 @@ import java.util.Map;
 import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.addnew.AddNewImageActivity;
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.home.bannerslider.BannerSliderAdaptor;
+import wackycodes.ecom.eanshopadmin.home.viewall.ViewAllActivity;
+import wackycodes.ecom.eanshopadmin.home.viewall.ViewAllBannerSliderActivity;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.MyGridView;
@@ -54,11 +61,15 @@ import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
 import wackycodes.ecom.eanshopadmin.product.horizontal.ProductHrGridAdaptor;
+import wackycodes.ecom.eanshopadmin.product.productview.ProductDetails;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
+import static wackycodes.ecom.eanshopadmin.home.HomeActivity.homeActivity;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.getTwoDigitRandom;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.BANNER_CLICK_TYPE_CATEGORY;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.BANNER_CLICK_TYPE_PRODUCT;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GALLERY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
@@ -67,7 +78,9 @@ import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_S
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_STRIP_AD_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_GRID_LAYOUT;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_HORIZONTAL_LAYOUT;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.VIEW_RECTANGLE_LAYOUT;
 
 public class HomePageAdaptor extends RecyclerView.Adapter {
 
@@ -77,11 +90,11 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
     private List <HomeListModel> homePageList;
     private RecyclerView.RecycledViewPool recycledViewPool;
 
-    public HomePageAdaptor(int catIndex, HomeCatListModel homeCatListModel) {
+    public HomePageAdaptor(int catIndex, List <HomeListModel> homePageList) {
         this.catIndex = catIndex;
-        this.catTitle = homeCatListModel.getCatName();
-        this.catID = homeCatListModel.getCatID();
-        this.homePageList = homeCatListModel.getHomeListModelList();
+        this.catTitle = homeCatListModelList.get( catIndex ).getCatName();
+        this.catID = homeCatListModelList.get( catIndex ).getCatID();
+        this.homePageList = homePageList;
     }
 
     @Override
@@ -224,13 +237,25 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                 }
             } );
 
+            // Click Listener...
             stripAdImage.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     showToast( "Code Not Found!", itemView.getContext() );
 //                   Click Type
-                    // 1. Product Click...
-                    // 2. ...
+                    switch ( clickType ){
+                        case BANNER_CLICK_TYPE_PRODUCT:
+                            Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
+                            productDetailIntent.putExtra( "PRODUCT_ID", clickID );
+//                            productDetailIntent.putExtra( "HOME_CAT_INDEX", catIndex );
+//                            productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+//                            productDetailIntent.putExtra( "PRODUCT_INDEX", proIndex );
+                            itemView.getContext().startActivity( productDetailIntent );
+                            break;
+                        case BANNER_CLICK_TYPE_CATEGORY:
+                        default:
+                            break;
+                    }
                 }
             } );
 
@@ -415,7 +440,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                         public void onClick(View view) {
                             // : Update Image....
                             Intent intent = new Intent( parent.getContext(), AddNewImageActivity.class );
-                            intent.putExtra( "CAT_ID", categoryTypeModelList.get( position ).getClickID() );
+                            intent.putExtra( "UPLOAD_CAT_ID", catID );
                             intent.putExtra( "LAY_ID", layoutID );
                             intent.putExtra( "CAT_NO", position );
                             intent.putExtra( "LOCAL_CAT_INDEX", catIndex );
@@ -452,7 +477,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                 for (HomeCatListModel temp : homeCatListModelList){
                     if ( temp.getCatID().equals( docID ) ){
 //                        catName = temp.getCatName();
-                        HomeActivity.setForwardFragment( new HomeFragment( tempIndex, docID, temp.getCatName() ) );
+                        replaceFragment( new HomeFragment( tempIndex, docID, temp.getCatName() ) );
                         break;
                     }
                     tempIndex++;
@@ -464,7 +489,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                 progressDialog.requestWindowFeature( Window.FEATURE_NO_TITLE );
                 progressDialog.setContentView( R.layout.dialog_single_edit_text );
                 progressDialog.setCancelable( false );
-                progressDialog.getWindow().setLayout( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT );
+                progressDialog.getWindow().setLayout( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
 
                 TextView  dTitle = progressDialog.findViewById( R.id.dialog_title );
                 final EditText dEditText = progressDialog.findViewById( R.id.dialog_editText );
@@ -490,6 +515,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                             Map<String, Object> uploadMap = new HashMap <>();
                             if (isNew){
                                 String catID = getNewCatID(dEditText.getText().toString());
+                                homeCatListModelList.add( new HomeCatListModel( catID, dEditText.getText().toString(), new ArrayList <HomeListModel>()  ) );
                                 categoryTypeModelList.add( new BannerModel(
                                         // Add in Local List...
                                         -1, catID,"",  dEditText.getText().toString(),
@@ -543,6 +569,13 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             }
         }
 
+        private void replaceFragment(Fragment fragment){
+            FragmentTransaction fragmentTransaction = homeActivity.getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.setCustomAnimations( R.anim.slide_from_right, R.anim.slide_out_from_left );
+            fragmentTransaction.replace( HomeActivity.homeActivityFrame.getId(), fragment );
+            fragmentTransaction.commit();
+        }
+
 
     }
     //==============  GridProduct Grid Layout View Holder =================
@@ -585,6 +618,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             layoutTitle.setText( "Slider Banners " + " (" + bannerList.size() + ")" );
             if (bannerList.size()>=2){
                 warningText.setVisibility( View.GONE );
+                layoutViewAllBtn.setVisibility( View.VISIBLE );
             }else{
                 warningText.setVisibility( View.VISIBLE );
                 warningText.setText( "Add 2 or more banner to visible this layout to the customers!!" );
@@ -600,13 +634,10 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             layoutViewAllBtn.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    ViewAllActivity.viewAllList = bannerAndCatModelList;
-//                    Intent viewAllIntent = new Intent( itemView.getContext(), ViewAllActivity.class);
-//                    viewAllIntent.putExtra( "TYPE", BANNER_SLIDER_LAYOUT_CONTAINER );
-//                    viewAllIntent.putExtra( "CAT_COLL_ID", collectionID );
-//                    viewAllIntent.putExtra( "CAT_INDEX", catType );
-//                    viewAllIntent.putExtra( "LAY_INDEX", index );
-//                    itemView.getContext().startActivity( viewAllIntent );
+                    Intent intent = new Intent( itemView.getContext(), ViewAllBannerSliderActivity.class );
+                    intent.putExtra( "CAT_INDEX", catIndex  );
+                    intent.putExtra( "LAY_INDEX", index  );
+                    itemView.getContext().startActivity( intent );
                 }
             } );
 
@@ -701,51 +732,54 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             visibleBtn.setVisibility( View.INVISIBLE );
         }
 
-        private void setData(String productLayId, String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
+        private void setData(String productLayId, final String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
 
             this.layoutTitle.setText( layoutTitle );
+            if (productIDList.size()>=1){
+                layoutViewAllBtn.setVisibility( View.VISIBLE );
+            }else {
+                layoutViewAllBtn.setVisibility( View.INVISIBLE );
+            }
+
+            // View All Button Click...
+            layoutViewAllBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent intent = new Intent( itemView.getContext(), ViewAllActivity.class );
+                    intent.putExtra( "CAT_INDEX", catIndex  );
+                    intent.putExtra( "LAY_INDEX", index  );
+                    intent.putExtra( "VIEW_TYPE", VIEW_RECTANGLE_LAYOUT  );
+                    intent.putExtra( "TITLE", layoutTitle  );
+
+                    itemView.getContext().startActivity( intent );
+                }
+            } );
 
             //--------------------------------------------------------------------------------------
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager( itemView.getContext() );
             linearLayoutManager.setOrientation( RecyclerView.HORIZONTAL );
             productRecyclerView.setLayoutManager( linearLayoutManager );
 
-            if (productIDList.size()>6){
-                layoutViewAllBtn.setVisibility( View.VISIBLE );
-            }else {
-                layoutViewAllBtn.setVisibility( View.INVISIBLE );
+            // Adaptor...
+            productHrGridAdaptor = new ProductHrGridAdaptor( catIndex, index, VIEW_HORIZONTAL_LAYOUT, productModelList );
+            productRecyclerView.setAdapter( productHrGridAdaptor );
+            productHrGridAdaptor.notifyDataSetChanged();
+            ////////
+
+            int range = 0;
+            if (productIDList.size() >= 6){
+                range = 6;
+            }else{
+                range = productIDList.size();
             }
 
-            layoutViewAllBtn.setOnClickListener( new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                }
-            } );
-
-            if(productModelList.size() == 0){
-                // Load Product...
-                if (productIDList.size() > 0){
-                    if (productIDList.size()>6){
-                        for (int id_no = 0; id_no < 6; id_no++){
-                        loadProductData(index, productIDList.get( id_no ));
-                        }
-                    }else{
-                        for (int id_no = 0; id_no < productIDList.size(); id_no++){
-                            loadProductData(index, productIDList.get( id_no ));
-                        }
-                    }
-                }else{
-                    productHrGridAdaptor = new ProductHrGridAdaptor( catIndex, index, VIEW_HORIZONTAL_LAYOUT, productModelList );
-                    productRecyclerView.setAdapter( productHrGridAdaptor );
+            for (int i = 0; i<range; i++){
+                if (productModelList.size() > i){
                     productHrGridAdaptor.notifyDataSetChanged();
-
+                }else{
+                    loadProductData(index, productIDList.get( i ));
                 }
-
-            }else{
-                productHrGridAdaptor = new ProductHrGridAdaptor( catIndex, index, VIEW_HORIZONTAL_LAYOUT, productModelList );
-                productRecyclerView.setAdapter( productHrGridAdaptor );
-                productHrGridAdaptor.notifyDataSetChanged();
             }
 
             //--------------------------------------------------------------------------------------
@@ -761,7 +795,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 //                            alertDialog( itemView.getContext(), index, layoutID, "SHOPS/" + SHOP_ID +"/banners", bannerList.get( 0 ).getDeleteID()  );
                             showToast( "Code Not Found!", itemView.getContext() );
                     }else{
-                        showToast( "You have more than 1 banner in this layout!", itemView.getContext() );
+                        showToast( "You have more than 1 Product in this layout!", itemView.getContext() );
                     }
                 }
             } );
@@ -822,11 +856,6 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
                                 // We can use Array...
                                 ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
-//                                int sz = Images.size();
-//                                String[] pImage = new String[sz];
-//                                for (int i = 0; i < sz; i++){
-//                                    pImage[i] = Images.get( i );
-//                                }
                                 // add Data...
                                 productSubModelList.add( new ProductSubModel(
                                         task.getResult().get( "p_name_"+tempI).toString(),
@@ -845,7 +874,8 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                             int p_veg_non_type = Integer.valueOf( task.getResult().get( "p_veg_non_type" ).toString() );
                             Boolean p_is_cod = (Boolean) task.getResult().get( "p_is_cod" );
 
-                            tempProductModelList.add( new ProductModel(
+
+                            ProductModel productModel =  new ProductModel(
                                     p_id,
                                     p_main_name,
                                     " ",
@@ -854,17 +884,13 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                                     p_weight_type,
                                     p_veg_non_type,
                                     productSubModelList
-                            ) );
-                            homeCatListModelList.get( catIndex ).getHomeListModelList().get( index ).setProductModelList( tempProductModelList );
+                            );
 
-                            if (productRecyclerView != null){
-                                if (productHrGridAdaptor == null){
-                                    productHrGridAdaptor = new ProductHrGridAdaptor( catIndex, index, VIEW_HORIZONTAL_LAYOUT, tempProductModelList );
-                                    productRecyclerView.setAdapter( productHrGridAdaptor );
-                                    productHrGridAdaptor.notifyDataSetChanged();
-                                }else{
-                                    productHrGridAdaptor.notifyDataSetChanged();
-                                }
+                            homeCatListModelList.get( catIndex ).getHomeListModelList().get( index ).getProductModelList().add( productModel );
+//                            homeCatListModelList.get( catIndex ).getHomeListModelList().get( index ).setProductModelList( tempProductModelList );
+
+                            if (productHrGridAdaptor != null) {
+                                productHrGridAdaptor.notifyDataSetChanged();
                             }
                         }
                     }
@@ -884,7 +910,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
     //============  Product Grid View Holder ============
     public class ProductGridViewHolder extends RecyclerView.ViewHolder{
 
-        private RecyclerView productRecyclerView;
+        private GridLayout gridLayout;
         private TextView layoutTitle;
         private TextView indexNo;
         private Button layoutViewAllBtn;
@@ -900,7 +926,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
         public ProductGridViewHolder(@NonNull View itemView) {
             super( itemView );
-            productRecyclerView = itemView.findViewById( R.id.horizontal_recycler );
+            gridLayout = itemView.findViewById( R.id.product_grid_layout );
             layoutTitle = itemView.findViewById( R.id.gridLayoutTitle );
             indexNo = itemView.findViewById( R.id.gridIndexNo );
             layoutViewAllBtn = itemView.findViewById( R.id.gridViewAllBtn );
@@ -913,17 +939,112 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             visibleBtn.setVisibility( View.INVISIBLE );
         }
 
-        private void setData(String productLayId, String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
+        private void setData(String productLayId, final String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
             this.layoutTitle.setText( layoutTitle );
 
             // -------------------------------------------------------------------------------------
+            warningText.setText( "Add min 4 products to make visible this layout to the customers.!" );
+            int gridRange;
+            if (productIDList.size()<3){
+                gridRange = productIDList.size();
+                warningText.setVisibility( View.VISIBLE );
+            }
+            else{
+                gridRange = 3;
+                if (productIDList.size()<4){
+                    warningText.setVisibility( View.VISIBLE );
+                }else{
+                    warningText.setVisibility( View.GONE );
+                }
+            }
 
+            // Load Product...
+            if (productModelList.size() == 0){
+                for (int i = 0; i < gridRange; i++ ){
+//                    setProductData(i, index, productIDList.get( i ) );
+                    loadGridProductData( index,  productIDList.get( i ) );
+                }
+            }
 
+            // Set The Product and CLickListener...
+            for (int i=0; i < gridRange; i++){
+                if (productModelList.size() > i ){
+                    ConstraintLayout itemLayout = gridLayout.getChildAt( i ).findViewById( R.id.product_view_const_layout );
+                    gridLayout.getChildAt( i ).findViewById( R.id.product_view_linear_layout ).setVisibility( View.GONE ); // Add New Product INVISIBLE..
+                    itemLayout.setVisibility( View.VISIBLE );
+                    // Get Reference...
+                    ImageView img = gridLayout.getChildAt( i ).findViewById( R.id.hr_product_image );
+                    TextView name = gridLayout.getChildAt( i ).findViewById( R.id.hr_product_name );
+                    TextView price = gridLayout.getChildAt( i ).findViewById( R.id.hr_product_price );
+                    TextView cutPrice = gridLayout.getChildAt( i ).findViewById( R.id.hr_product_cut_price );
+                    TextView perOffText = gridLayout.getChildAt( i ).findViewById( R.id.hr_off_percentage );
+                    // Set Data...
+                    // Get SubModel....
+                    ProductSubModel productSubModel = productModelList.get( i ).getProductSubModelList().get( 0 );
 
+                    // Set img resource
+                    Glide.with( itemView.getContext() ).load( productSubModel.getpImage().get( 0 )  )
+                            .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( img );
+
+                    name.setText( productSubModel.getpName() );
+
+                    price.setText("Rs." + productSubModel.getpSellingPrice() +"/-" );
+                    cutPrice.setText("Rs." + productSubModel.getpMrpPrice() +"/-" );
+                    perOffText.setText( productSubModel.getpOffer() + "%Off" );
+
+                    // ClickListener...
+                    itemLayout.setOnClickListener( new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if ( v == gridLayout.getChildAt( 0 ).findViewById( R.id.product_view_const_layout )){
+                            addOnProductClick(  productIDList.get( 0 ), index, 0 );
+                            } else
+                            if ( v == gridLayout.getChildAt( 1 ).findViewById( R.id.product_view_const_layout )){
+                                addOnProductClick(  productIDList.get( 1 ), index, 1 );
+                            } else
+                            if ( v == gridLayout.getChildAt( 2 ).findViewById( R.id.product_view_const_layout )){
+                                addOnProductClick(  productIDList.get( 2 ), index, 2 );
+                            }
+                        }
+                    } );
+                }
+            }
+
+            // Add new Product in Grid Layout...
+            for (int k = 0; k < 4; k++ ) {
+                ConstraintLayout itemLayout = gridLayout.getChildAt( k ).findViewById( R.id.product_view_const_layout );
+                LinearLayout addNewItemLayout = gridLayout.getChildAt( k ).findViewById( R.id.product_view_linear_layout );
+                if ( k < gridRange ){
+                    itemLayout.setVisibility( View.VISIBLE );
+                    addNewItemLayout.setVisibility( View.GONE );
+                }else{
+                    itemLayout.setVisibility( View.GONE );
+                    addNewItemLayout.setVisibility( View.VISIBLE );
+//                    addNewItemLayout.setLayoutParams( new ViewGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT ) );
+                }
+
+                addNewItemLayout.setOnClickListener( new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        addNewItem( index );
+                      /**  if ( v == gridLayout.getChildAt( 0 ).findViewById( R.id.add_new_item_Linearlayout )){
+                            addNewItem( index );
+                        } else
+                        if ( v == gridLayout.getChildAt( 1 ).findViewById( R.id.add_new_item_Linearlayout )){
+                            addNewItem( index );
+                        } else
+                        if ( v == gridLayout.getChildAt( 2 ).findViewById( R.id.add_new_item_Linearlayout )){
+                            addNewItem( index );
+                        } else
+                        if ( v == gridLayout.getChildAt( 3 ).findViewById( R.id.add_new_item_Linearlayout )){
+                            addNewItem( index );
+                        } */
+                    }
+                } );
+
+            }
 
             // -------------------------------------------------------------------------------------
-
-
             deleteLayoutBtn.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -938,6 +1059,19 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
                         showToast( "You have more than 1 banner in this layout!", itemView.getContext() );
                     }
 
+                }
+            } );
+
+            layoutViewAllBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent( itemView.getContext(), ViewAllActivity.class );
+                    intent.putExtra( "CAT_INDEX", catIndex  );
+                    intent.putExtra( "LAY_INDEX", index  );
+                    intent.putExtra( "VIEW_TYPE", VIEW_GRID_LAYOUT  );
+                    intent.putExtra( "TITLE", layoutTitle  );
+
+                    itemView.getContext().startActivity( intent );
                 }
             } );
 
@@ -978,9 +1112,99 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
         }
 
+        private void addNewItem(int layIndex){
+            Intent addProduct = new Intent( itemView.getContext(), AddNewProductActivity.class );
+            addProduct.putExtra( "CAT_INDEX", catIndex );
+            addProduct.putExtra( "LAY_INDEX", layIndex );
+            addProduct.putExtra( "UPDATE", false );
+
+            itemView.getContext().startActivity( addProduct );
+
+        }
+//        addOnProductClick(  gridLayoutProductIdList.get( 0 ), itemView.getContext(), index );
+        private void addOnProductClick(String productId, int layoutIndex, int proIndex ){
+            Intent productDetailIntent = new Intent( itemView.getContext(), ProductDetails.class );
+            productDetailIntent.putExtra( "PRODUCT_ID", productId );
+            productDetailIntent.putExtra( "HOME_CAT_INDEX", catIndex );
+            productDetailIntent.putExtra( "LAYOUT_INDEX", layoutIndex );
+            productDetailIntent.putExtra( "PRODUCT_INDEX", proIndex );
+            itemView.getContext().startActivity( productDetailIntent );
+        }
+
     }
     //============  Product Grid View Holder ============
 
+    // Load Product Data...
+    private void loadGridProductData(final int index, final String productId ){
+        DBQuery.firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
+                .collection( "PRODUCTS" ).document( productId )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    // access the banners from database...
+                    DocumentSnapshot documentSnapshot = task.getResult();
+
+                    if ( documentSnapshot.get( "p_no_of_variants" ) !=null ){
+//                            String[] pImage;
+                        int p_no_of_variants = Integer.valueOf( String.valueOf( (long) documentSnapshot.get( "p_no_of_variants" ) ) );
+                        List<ProductSubModel> productSubModelList = new ArrayList <>();
+                        for (int tempI = 1; tempI <= p_no_of_variants; tempI++){
+
+                            // We can use Array...
+                            ArrayList<String> Images = (ArrayList <String>) documentSnapshot.get( "p_image_" + tempI );
+                            // add Data...
+                            productSubModelList.add( new ProductSubModel(
+                                    task.getResult().get( "p_name_"+tempI).toString(),
+                                    Images,
+                                    task.getResult().get( "p_selling_price_"+tempI).toString(),
+                                    task.getResult().get( "p_mrp_price_"+tempI).toString(),
+                                    task.getResult().get( "p_weight_"+tempI).toString(),
+                                    task.getResult().get( "p_stocks_"+tempI).toString(),
+                                    task.getResult().get( "p_offer_"+tempI).toString()
+                            ) );
+                        }
+                        String p_id = task.getResult().get( "p_id").toString();
+                        String p_main_name = task.getResult().get( "p_main_name" ).toString();
+//                        String p_main_image = task.getResult().get( "p_main_image" ).toString();
+                        String p_weight_type = task.getResult().get( "p_weight_type" ).toString();
+                        int p_veg_non_type = Integer.valueOf( task.getResult().get( "p_veg_non_type" ).toString() );
+                        Boolean p_is_cod = (Boolean) task.getResult().get( "p_is_cod" );
+
+                        ProductModel productModel =  new ProductModel(
+                                p_id,
+                                p_main_name,
+                                " ",
+                                p_is_cod,
+                                String.valueOf(p_no_of_variants),
+                                p_weight_type,
+                                p_veg_non_type,
+                                productSubModelList
+                        );
+
+                        homeCatListModelList.get( catIndex ).getHomeListModelList().get( index ).getProductModelList().add( productModel );
+
+                        if (homePageList.get( index ).getLayoutType() == HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER){
+                            // Horizontal Adaptor...
+
+                        }else if(homePageList.get( index ).getLayoutType() == GRID_PRODUCTS_LAYOUT_CONTAINER){
+                            // Grid Adaptor...
+                            HomeFragment.homePageAdaptor.notifyDataSetChanged();
+
+                        }
+
+
+                    }
+                }
+                else{
+                    String error = task.getException().getMessage();
+//                                    showToast(error);
+//                                    dialog.dismiss();
+                }
+            }
+        } );
+
+    }
 
     private void setIndexUpDownVisibility( int index, ImageView indexUpBtn,  ImageView indexDownBtn){
         if (homePageList.size()>1){

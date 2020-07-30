@@ -2,6 +2,8 @@ package wackycodes.ecom.eanshopadmin.product;
 
 import java.util.List;
 
+import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddSpecificationModel;
+
 public class ProductSubModel {
 
     private String pName;
@@ -11,6 +13,8 @@ public class ProductSubModel {
     private String pWeight;
     private String pStocks;
     private String pOffer;
+    // Specification List...
+    private List<AddSpecificationModel> pSpecificationList;
 
     public ProductSubModel(String pName, List<String> pImage, String pSellingPrice, String pMrpPrice, String pWeight, String pStocks, String pOffer) {
         this.pName = pName;
@@ -76,5 +80,13 @@ public class ProductSubModel {
 
     public void setpOffer(String pOffer) {
         this.pOffer = pOffer;
+    }
+
+    public List <AddSpecificationModel> getpSpecificationList() {
+        return pSpecificationList;
+    }
+
+    public void setpSpecificationList(List <AddSpecificationModel> pSpecificationList) {
+        this.pSpecificationList = pSpecificationList;
     }
 }

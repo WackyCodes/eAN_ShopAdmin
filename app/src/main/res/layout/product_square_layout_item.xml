@@ -9,7 +9,7 @@
     android:background="@drawable/back_rectangle_4dp_layout"
     android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="216dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/product_view_const_layout"
@@ -44,15 +44,17 @@
             android:id="@+id/hr_product_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
             android:lines="2"
             android:maxLines="2"
             android:padding="1dp"
             android:text=" "
             android:textColor="#000000"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@+id/hr_product_image"
-            app:layout_constraintStart_toStartOf="@+id/hr_product_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/hr_product_image" />
 
         <TextView
@@ -103,11 +105,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/product_view_linear_layout"
         android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:gravity="center"
+        android:textAlignment="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <ImageView
             android:id="@+id/image"
             android:layout_width="120dp"

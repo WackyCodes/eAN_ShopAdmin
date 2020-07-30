@@ -2,6 +2,7 @@ package wackycodes.ecom.eanshopadmin.database;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +13,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -23,10 +25,14 @@ import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.home.HomeCatListModel;
+import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.home.HomeListModel;
+import wackycodes.ecom.eanshopadmin.home.HomePageAdaptor;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 
+import static wackycodes.ecom.eanshopadmin.MainActivity.mainActivity;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
@@ -98,6 +104,86 @@ public class DBQuery {
         } ); */
     }
 
+    // Get Shop Data...
+    public static void getShopData(final String shopID){
+        firebaseFirestore.collection( "SHOPS" ).document( shopID )
+                .get().addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                if (task.isSuccessful()){
+                    DocumentSnapshot documentSnapshot = task.getResult();
+
+                    Boolean available_service = documentSnapshot.getBoolean( "available_service" );
+                    Boolean is_open = documentSnapshot.getBoolean( "is_open" );
+                    String shop_address = documentSnapshot.get( "shop_address" ).toString();
+                    String shop_area_code = documentSnapshot.get( "shop_area_code" ).toString();
+//                    String shop_area_name = documentSnapshot.get( "shop_area_name" ).toString();
+//                    String shop_cat_main = documentSnapshot.get( "shop_cat_main" ).toString();
+                    String shop_category_name = documentSnapshot.get( "shop_category_name" ).toString();
+
+                    // shop_categories
+
+                    String shop_city_name = documentSnapshot.get( "shop_city_name" ).toString();
+//                    String shop_close_msg = documentSnapshot.get( "shop_close_msg" ).toString();
+//                    String shop_id = documentSnapshot.get( "shop_id" ).toString();
+                    String shop_landmark = documentSnapshot.get( "shop_landmark" ).toString();
+                    String shop_logo = documentSnapshot.get( "shop_logo" ).toString();
+                    String shop_name = documentSnapshot.get( "shop_name" ).toString();
+
+                    String shop_owner_address = documentSnapshot.get( "shop_owner_address" ).toString();
+                    String shop_owner_name = documentSnapshot.get( "shop_owner_name" ).toString();
+                    String shop_owner_mobile = documentSnapshot.get( "shop_owner_mobile" ).toString();
+                    String shop_owner_email = documentSnapshot.get( "shop_owner_email" ).toString();
+                    String shop_veg_non_type = documentSnapshot.get( "shop_veg_non_type" ).toString();
+                    String shop_image = documentSnapshot.get( "shop_image" ).toString();
+                    String shop_rating = documentSnapshot.get( "shop_rating" ).toString();
+                    String shop_open_time;
+                    String shop_close_time;
+
+                    if ( documentSnapshot.get( "shop_open_time" )!=null && documentSnapshot.get( "shop_close_time" ) != null ){
+                        shop_open_time = documentSnapshot.get( "shop_open_time" ).toString();
+                        shop_close_time = documentSnapshot.get( "shop_close_time" ).toString();
+                    }else{
+                        shop_open_time = "AM";
+                        shop_close_time = "PM";
+                    }
+
+                    // tags...
+
+                    ADMIN_DATA_MODEL.setShopID( shopID );
+                    ADMIN_DATA_MODEL.setShopName( shop_name );
+                    ADMIN_DATA_MODEL.setServiceAvailable( available_service );
+                    ADMIN_DATA_MODEL.setOpen( is_open );
+                    ADMIN_DATA_MODEL.setShopAddress( shop_address );
+                    ADMIN_DATA_MODEL.setShopAreaCode( shop_area_code );
+                    ADMIN_DATA_MODEL.setShopCategory( shop_category_name );
+                    ADMIN_DATA_MODEL.setShopCity( shop_city_name );
+//                    shopHomeActivityModel.setShopCloseTime( shop_close_msg );
+                    ADMIN_DATA_MODEL.setShopLandMark( shop_landmark );
+                    ADMIN_DATA_MODEL.setShopLogo( shop_logo );
+
+                    ADMIN_DATA_MODEL.setShopOwnerAddress( shop_owner_address );
+                    ADMIN_DATA_MODEL.setShopOwnerName( shop_owner_name );
+                    ADMIN_DATA_MODEL.setShopOwnerMobile( shop_owner_mobile );
+                    ADMIN_DATA_MODEL.setShopOwnerEmail( shop_owner_email );
+                    ADMIN_DATA_MODEL.setShopVegNonCode( Integer.parseInt( shop_veg_non_type ) );
+                    ADMIN_DATA_MODEL.setShopImage( shop_image );
+                    ADMIN_DATA_MODEL.setShopRatingStars( shop_rating );
+                    ADMIN_DATA_MODEL.setShopOpenTime( shop_open_time );
+                    ADMIN_DATA_MODEL.setShopCloseTime( shop_close_time );
+
+                    if (mainActivity != null){
+                        mainActivity.getSupportActionBar().setTitle( ADMIN_DATA_MODEL.getShopName() );
+                    }
+
+                }
+                else{
+                    // Failed...
+                }
+            }
+        } );
+
+    }
 
     // Query to Load Fragment Data like homepage items etc...
     public static void getHomeCatListQuery(final Context context
@@ -113,6 +199,7 @@ public class DBQuery {
 
                         if (task.isSuccessful()){
                             homeListModelList = new ArrayList <>();
+                            HomeListModel homeListModel;
                             // add Data from snapshot...
                             for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                                 int viewType = Integer.parseInt( String.valueOf( (long)documentSnapshot.get( "type" ) ) );
@@ -126,6 +213,10 @@ public class DBQuery {
                                     for (long i = 1; i <= no_of_banners; i++) {
                                         // access the banners from database...
 //                                        int clickType, String clickID, String imageLink, String nameOrExtraText, String deleteID
+                                        /*
+                                        bSliderItem.put( "banner_click_id_"+ bannerNo, bannerClickID ); // String
+                                        bSliderItem.put( "banner_click_type_"+ bannerNo, bannerClickType ); // int
+                                         */
                                         bannerModelList.add( new BannerModel(
                                                 -1, "ClickID",
                                                 documentSnapshot.get( "banner_" + i ).toString(),
@@ -133,20 +224,28 @@ public class DBQuery {
                                                 "delete ID" ));
                                     }
                                     // add the banners list in the home recycler list...
-                                    homeListModelList.add( new HomeListModel( SHOP_HOME_BANNER_SLIDER_CONTAINER, layout_id, visibility, bannerModelList ) );
+//                                    homeListModelList.add( new HomeListModel( SHOP_HOME_BANNER_SLIDER_CONTAINER, layout_id, visibility, bannerModelList ) );
+                                    homeListModel = new HomeListModel( SHOP_HOME_BANNER_SLIDER_CONTAINER, layout_id, visibility, bannerModelList );
+                                    if (homeCatListModelList.size() > 0){
+                                        homeCatListModelList.get( index ).getHomeListModelList().add( homeListModel );
+                                    }
 
                                 } else
                                 if ( viewType == SHOP_HOME_STRIP_AD_CONTAINER) {
                                     /**  for strip and banner ad */
                                     String layout_id = documentSnapshot.get( "layout_id" ).toString();
                                     BannerModel bannerModel = new BannerModel(
-                                            Integer.parseInt( String.valueOf( (long) documentSnapshot.get( "strip_ad_type" ) ) ),
-                                            documentSnapshot.get( "strip_ad_click_id" ).toString(),
-                                            documentSnapshot.get( "strip_ad_image" ).toString(),
+                                            Integer.parseInt( String.valueOf( (long) documentSnapshot.get( "banner_click_type" ) ) ),
+                                            documentSnapshot.get( "banner_click_id" ).toString(),
+                                            documentSnapshot.get( "banner_image" ).toString(),
                                             documentSnapshot.get( "extra_text" ).toString(),
-                                            documentSnapshot.get( "strip_delete_id" ).toString()
+                                            documentSnapshot.get( "delete_id" ).toString()
                                             );
-                                    homeListModelList.add( new HomeListModel( SHOP_HOME_STRIP_AD_CONTAINER, layout_id, bannerModel ) );
+//                                    homeListModelList.add( new HomeListModel( SHOP_HOME_STRIP_AD_CONTAINER, layout_id, bannerModel ) );
+                                    homeListModel = new HomeListModel( SHOP_HOME_STRIP_AD_CONTAINER, layout_id, bannerModel );
+                                    if (homeCatListModelList.size() > 0){
+                                        homeCatListModelList.get( index ).getHomeListModelList().add( homeListModel );
+                                    }
                                 } else
                                 if ( viewType == HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER ||
                                         viewType == GRID_PRODUCTS_LAYOUT_CONTAINER) {
@@ -162,11 +261,16 @@ public class DBQuery {
                                         hrAndGridProductIdList.add( documentSnapshot.get( "product_id_" + i ).toString() );
                                     }
                                     // add list in home fragment model
-                                    homeListModelList.add( new HomeListModel( viewType, layout_id, layout_title, hrAndGridProductIdList,
-                                            new ArrayList <ProductModel>() ) );
+//                                    homeListModelList.add( new HomeListModel( viewType, layout_id, layout_title, hrAndGridProductIdList,
+//                                            new ArrayList <ProductModel>() ) );
+                                    homeListModel =  new HomeListModel( viewType, layout_id, layout_title, hrAndGridProductIdList,
+                                            new ArrayList <ProductModel>() );
+                                    if (homeCatListModelList.size() > 0){
+                                        homeCatListModelList.get( index ).getHomeListModelList().add( homeListModel );
+                                    }
 
                                 } else
-                                if ( viewType == SHOP_HOME_CAT_LIST_CONTAINER) {
+                                if ( viewType == SHOP_HOME_CAT_LIST_CONTAINER) { // TODO : Create New Type For SubCategory...
                                     String layout_id = documentSnapshot.get( "layout_id" ).toString();
                                     Boolean visibility = documentSnapshot.getBoolean( "visibility" );
                                     bannerModelList = new ArrayList <>();
@@ -180,24 +284,35 @@ public class DBQuery {
                                                 documentSnapshot.get( "cat_name_"+i ).toString(),
                                                 "delete ID" ));
                                         // To add Category id and Category Name in homeCatListModelList(Main List)...
-                                        homeCatListModelList.add( new HomeCatListModel( documentSnapshot.get( "cat_id_"+i ).toString()
-                                                , documentSnapshot.get( "cat_name_"+i ).toString(), new ArrayList <HomeListModel>()  ) );
+                                        if ( swipeRefreshLayout == null){
+                                            homeCatListModelList.add( new HomeCatListModel( documentSnapshot.get( "cat_id_"+i ).toString()
+                                                    , documentSnapshot.get( "cat_name_"+i ).toString(), new ArrayList <HomeListModel>()  ) );
+                                        }
                                     }
                                     // add the banners list in the home recycler list...
-                                    homeListModelList.add( new HomeListModel( SHOP_HOME_CAT_LIST_CONTAINER, layout_id, visibility, bannerModelList ) );
-
+//                                    homeListModelList.add( new HomeListModel( SHOP_HOME_CAT_LIST_CONTAINER, layout_id, visibility, bannerModelList ) );
+                                    homeListModel = new HomeListModel( SHOP_HOME_CAT_LIST_CONTAINER, layout_id, visibility, bannerModelList );
+                                    if (homeCatListModelList.size() > 0){
+                                        homeCatListModelList.get( index ).getHomeListModelList().add( homeListModel );
+                                    }
                                 }
                                 // Load data without waste of time...
 //                                homeFragmentAdaptor.notifyDataSetChanged();
-                                if (homeCatListModelList.size() > 0){
-                                    homeCatListModelList.get( index ).setHomeListModelList( homeListModelList );
+//                                if (homeCatListModelList.size() > 0){
+//                                    homeCatListModelList.get( index ).setHomeListModelList( homeListModelList );
+//                                }
+                                if (HomeFragment.homePageAdaptor != null){
+                                    HomeFragment.homePageAdaptor.notifyDataSetChanged();
                                 }
                             }
                             // At the last... When We add All Data in homeListModelList...
 //                            homeCatListModelList.add( index, new HomeCatListModel( categoryID, "Cat_Name",  homeListModelList ) );
                             // Or..
-                            if (homeCatListModelList.size() > 0){
-                                homeCatListModelList.get( index ).setHomeListModelList( homeListModelList );
+//                            if (homeCatListModelList.size() > 0){
+//                                homeCatListModelList.get( index ).setHomeListModelList( homeListModelList );
+//                            }
+                            if (HomeFragment.homePageAdaptor != null){
+                                HomeFragment.homePageAdaptor.notifyDataSetChanged();
                             }
 
                             // $ Changes...
@@ -205,8 +320,26 @@ public class DBQuery {
                                 dialog.dismiss();
                             }
 
-                        }else{
+                            //swipeRefreshLayout
+                            if (swipeRefreshLayout!=null){
+                                swipeRefreshLayout.setRefreshing( false );
+                            }
 
+                            if (HomeFragment.homePageAdaptor != null){
+                                HomeFragment.homePageAdaptor.notifyDataSetChanged();
+                            }
+
+                        }
+                        else{
+                            // $ Changes...
+                            if (dialog!=null){
+                                dialog.dismiss();
+                            }
+
+                            //swipeRefreshLayout
+                            if (swipeRefreshLayout!=null){
+                                swipeRefreshLayout.setRefreshing( false );
+                            }
 
                         }
 

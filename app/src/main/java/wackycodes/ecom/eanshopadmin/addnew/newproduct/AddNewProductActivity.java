@@ -70,6 +70,7 @@ import wackycodes.ecom.eanshopadmin.product.ProductModel;
 import wackycodes.ecom.eanshopadmin.product.ProductSubModel;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GALLERY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_EGG;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_NON_VEG;
@@ -77,7 +78,6 @@ import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_LACTO_VEG;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.PRODUCT_OTHERS;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.READ_EXTERNAL_MEMORY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
-import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_NAME;
 
 public class AddNewProductActivity extends AppCompatActivity {
 
@@ -432,7 +432,7 @@ public class AddNewProductActivity extends AppCompatActivity {
                     DialogsClass.alertDialog( this, null, "Select Product Label..!" ).show();
                     return false;
                 }
-                if (isNotEmptyEditText( newProDetails )){
+                if (!isNotEmptyEditText( newProDetails )){
                     showToast( "Enter Missing Fields!" );
                     return false;
                 }
@@ -470,9 +470,9 @@ public class AddNewProductActivity extends AppCompatActivity {
         tString.replaceAll( "[^a-zA-Z0-9]", "" );
 
         if (tagString == null){
-            tString = SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", " + tString.toLowerCase().replaceAll( " ", ", " );
+            tString = ADMIN_DATA_MODEL.getShopName().toLowerCase().replaceAll( " ", ", " ) + ", " + tString.toLowerCase().replaceAll( " ", ", " );
         }else{
-            tString = tagString + ", "+ SHOP_NAME.toLowerCase().replaceAll( " ", ", " ) + ", "
+            tString = tagString + ", "+  ADMIN_DATA_MODEL.getShopName().toLowerCase().replaceAll( " ", ", " ) + ", "
                     + tString.toLowerCase().replaceAll( " ", ", " );
         }
 
@@ -1102,7 +1102,7 @@ public class AddNewProductActivity extends AppCompatActivity {
             updateMap.put( "a_current_state", "Y" );  // Check the current State
             updateMap.put( "a_no_of_uses", 1 ); // Check No. Of Uses...
             updateMap.put( "p_id", productID );
-            // Primary - fields..
+            // Primary - fields...
             updateMap.put( "p_main_name", newProFullName.getText().toString() );
             updateMap.put( "p_main_image", imageList.get( 0 ) );
             updateMap.put( "p_weight_type", qtyTypeText );
@@ -1111,6 +1111,7 @@ public class AddNewProductActivity extends AppCompatActivity {
             updateMap.put( "p_is_cod", p_is_cod );
 
             updateMap.put( "product_details", newProDetails.getText().toString() );
+            updateMap.put( "use_tab_layout", false );
 
             List<ProductSubModel> tempPSubList = new ArrayList <>();
             tempPSubList.add( productSubModel );

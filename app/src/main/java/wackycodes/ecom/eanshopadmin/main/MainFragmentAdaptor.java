@@ -12,8 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import wackycodes.ecom.eanshopadmin.R;
-import wackycodes.ecom.eanshopadmin.addnew.newproduct.AddNewProductActivity;
 import wackycodes.ecom.eanshopadmin.home.HomeActivity;
+import wackycodes.ecom.eanshopadmin.main.shop.AboutShopActivity;
 
 import static wackycodes.ecom.eanshopadmin.main.MainFragment.mainPageList;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
@@ -65,8 +65,8 @@ public class MainFragmentAdaptor extends BaseAdapter {
     private void setOnClick(Context context, int ID){
         switch (ID){
             case REQUEST_TO_VIEW_SHOP:
-                Intent addProduct = new Intent( context, AddNewProductActivity.class );
-                context.startActivity( addProduct );
+                Intent shopProfileIntent = new Intent( context, AboutShopActivity.class );
+                context.startActivity( shopProfileIntent );
                 break;
             case REQUEST_TO_VIEW_HOME:
                 Intent viewHomeIntent = new Intent( context, HomeActivity.class );

@@ -12,10 +12,9 @@ public class StaticValues {
     public static final String DEFAULT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_CODE = "BHOPAL";
-    public static String SHOP_ID ;
-    public static String SHOP_NAME = "An shop";
-
     public static final AdminDataModel ADMIN_DATA_MODEL = new AdminDataModel();
+
+    public static String SHOP_ID =  ADMIN_DATA_MODEL.getShopName();
 
     // ClipBoard..
     public static ClipboardManager clipboardManager;
@@ -99,6 +98,7 @@ public class StaticValues {
     public static final int VIEW_HORIZONTAL_LAYOUT = 0;
     public static final int VIEW_RECTANGLE_LAYOUT = 1;
     public static final int VIEW_GRID_LAYOUT = 2;
+    public static final int VIEW_PRODUCT_SEARCH_LAYOUT = 3;
 
 
 }

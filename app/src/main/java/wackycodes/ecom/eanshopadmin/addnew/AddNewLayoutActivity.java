@@ -60,6 +60,7 @@ import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 import wackycodes.ecom.eanshopadmin.other.UpdateImages;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
+import wackycodes.ecom.eanshopadmin.product.search.ProductSearchActivity;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.getRandomNumAccordingToDate;
@@ -147,6 +148,7 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
         bannerDialogUploadImage.setOnClickListener( this );
         bannerDialogCancelBtn.setOnClickListener( this );
         bannerDialogOkBtn.setOnClickListener( this );
+        bannerNewProductBtn.setOnClickListener( this );
         // Add New Banner in Slider....
 
         if (isTaskIsUpdate){
@@ -167,23 +169,11 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
                 // show the Banner Dialog...
                 bannerDialogLayoutFrame.setVisibility( View.VISIBLE );
                 bannerDialogType = layoutType;
-                if (isTaskIsUpdate ){
-//                    if ( UpdateImages.uploadImageBgColor != null){
-//                        bannerClickLink.setText( UpdateImages.uploadImageBgColor.substring( 1 ) );
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                            Glide.with( this ).load( UpdateImages.uploadImageLink )
-//                                    .apply( new RequestOptions().placeholder( R.drawable.ic_panorama_black_24dp ) ).into( bannerDialogBannerImage );
-//
-//                        }
-//                    }
-                }
-                else{
-                    bannerDialogBannerImage.setVisibility( View.VISIBLE );
-                    bannerDialogBannerImage.setImageResource( R.drawable.ic_panorama_black_24dp );
-                    UpdateImages.uploadImageLink = null;
-                    bannerImageUri = null;
-                    bannerProductIdText.setText( "" );
-                }
+                bannerDialogBannerImage.setVisibility( View.VISIBLE );
+                bannerDialogBannerImage.setImageResource( R.drawable.ic_panorama_black_24dp );
+                UpdateImages.uploadImageLink = null;
+                bannerImageUri = null;
+                bannerProductIdText.setText( "" );
                 break;
             default:
                 break;
@@ -343,7 +333,9 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
         }
         // --------- Add New Banner in Slider or Add ad layout of Strip or Banner...!
         else if (v == bannerNewProductBtn){
-            // TODO : New Product ID : GOTO search Product...
+            //  New Product ID : GOTO search Product...
+            Intent intent = new Intent( AddNewLayoutActivity.this, ProductSearchActivity.class );
+            startActivity( intent );
         }
     }
 
@@ -425,7 +417,7 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
 
                 int bannerNo =  homePageList.get( layoutIndex ).getBannerModelList().size();
 //                    bSliderItem.put( "index", layoutIndex );
-//                bSliderItem.put( "layout_id", homePageList.get( layoutIndex ).getLayoutID() );
+                bSliderItem.put( "layout_id", homePageList.get( layoutIndex ).getLayoutID() );
                 bSliderItem.put( "banner_"+ bannerNo, bannerImgLink ); // String
                 bSliderItem.put( "banner_click_id_"+ bannerNo, bannerClickID ); // String
                 bSliderItem.put( "banner_click_type_"+ bannerNo, bannerClickType ); // int
@@ -666,7 +658,7 @@ public class AddNewLayoutActivity extends AppCompatActivity implements View.OnCl
         if (bannerDialogType == BANNER_SLIDER_CONTAINER_ITEM){
             CropImage.activity(imageUri)
                     .setGuidelines( CropImageView.Guidelines.ON)
-                    .setAspectRatio( 3,2 )
+                    .setAspectRatio( 2,1 )
                     .setMultiTouchEnabled(true)
                     .start(this);
         }else{

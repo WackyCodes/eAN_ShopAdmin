@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:layout_below="@+id/sample_heading"
-        android:text="Product ID: 4500163221"
+        android:text="Product ID: "
         android:textColor="@color/colorYellow"
         android:textSize="16sp"
         android:padding="2dp"

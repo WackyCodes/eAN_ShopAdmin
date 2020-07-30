@@ -79,7 +79,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 SHOP_ID = shopID.trim();
                 ADMIN_DATA_MODEL.setAdminMobile( userMobile.trim() );
                 checkAdminPermission();
-                showToast( "Mobile : "+ ADMIN_DATA_MODEL.getAdminMobile() + " \n ID: "+ SHOP_ID );
             }else{
                 firebaseAuth.signOut();
                 startActivity( new Intent( WelcomeActivity.this, AuthActivity.class ) );
@@ -114,6 +113,9 @@ public class WelcomeActivity extends AppCompatActivity {
                         ADMIN_DATA_MODEL.setAdminCode( Integer.parseInt( admin_code ) );
                         ADMIN_DATA_MODEL.setAdminName( admin_name );
                         ADMIN_DATA_MODEL.setAdminPhoto( admin_photo );
+                        // Load Shop Data...
+                        DBQuery.getShopData( SHOP_ID );
+                        // Start Activity ..
                         Intent intent = new Intent( WelcomeActivity.this, MainActivity.class );
                         startActivity( intent );
                         finish();

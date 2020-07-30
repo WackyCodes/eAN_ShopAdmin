@@ -62,7 +62,7 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
 
     private String uploadPath;
 
-    private String catID;
+    private String uploadCatID;
     private String layoutID;
     private int catIDNo;
     private int catLocalIndex;
@@ -76,7 +76,7 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
         setContentView( R.layout.activity_add_new_image );
         dialog = DialogsClass.getDialog( this );
 
-        catID = getIntent().getStringExtra( "CAT_ID" );
+        uploadCatID = getIntent().getStringExtra( "UPLOAD_CAT_ID" );
         layoutID = getIntent().getStringExtra( "LAY_ID" );
         catIDNo = getIntent().getIntExtra( "CAT_NO", -1 );
         catLocalIndex = getIntent().getIntExtra( "LOCAL_CAT_INDEX", -1 );
@@ -84,12 +84,18 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
 
         uploadPath = "SHOPS/" + SHOP_ID + "/CAT_IMAGES/";
 
+        homeCatListModelList.get( catLocalIndex ).getHomeListModelList().get( layoutIndex )
+                .getBannerModelList().get( catIDNo ).getClickID();
+
+        tempCatURI = null;
+
                 // Add Category...
         addNewCatImage =  findViewById( R.id.add_new_cat_image );
         addNewCatAddImgBtn =  findViewById( R.id.add_new_cat_image_text );
         addNewCatDoneBtn =  findViewById( R.id.add_new_cat_add_text );
         backBtn =  findViewById( R.id.back_text );
 
+        addNewCatAddImgBtn.setOnClickListener( this );
         // Cat Btn...
         backBtn.setOnClickListener( this );
         addNewCatDoneBtn.setOnClickListener( this );
@@ -111,7 +117,9 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
         }else if (view == addNewCatDoneBtn){
             if ( tempCatURI != null){
                 dialog.show();
-                uploadImageOnFirebaseStorage( this, dialog, tempCatURI, addNewCatImage, uploadPath, catID  );
+                String name = homeCatListModelList.get( catLocalIndex ).getHomeListModelList().get( layoutIndex )
+                        .getBannerModelList().get( catIDNo ).getClickID();
+                uploadImageOnFirebaseStorage( this, dialog, tempCatURI, addNewCatImage, uploadPath, name  );
             }else{
                 showToast( this, "Please Add Image First!" );
             }
@@ -193,12 +201,13 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
 
     private void  updateCatOnDataBase(){
 
+        int imageNo = catIDNo + 1;
         Map <String, Object> uploadMap = new HashMap <>();
         uploadMap.put( "cat_image_"+(catIDNo+1), uploadImageLink );
 
         firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
-                .collection( catID ).document( layoutID )
-                .update( uploadMap )
+                .collection( uploadCatID ).document( layoutID )
+                .update( "cat_image_"+imageNo, uploadImageLink )
                 .addOnCompleteListener( new OnCompleteListener <Void>() {
                     @Override
                     public void onComplete(@NonNull Task <Void> task) {

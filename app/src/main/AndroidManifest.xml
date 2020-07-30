@@ -16,7 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".addnew.AddNewImageActivity"></activity>
+        <activity android:name=".main.shop.AboutShopActivity" />
+        <activity android:name=".product.search.ProductSearchActivity" />
+        <activity android:name=".home.viewall.ViewAllBannerSliderActivity" />
+        <activity android:name=".home.viewall.ViewAllActivity" />
+        <activity android:name=".addnew.AddNewImageActivity" />
         <activity android:name=".addnew.newproduct.AddSpecificationActivity" />
         <activity android:name=".product.productview.ProductDetails" />
         <activity android:name=".addnew.newproduct.AddNewProductActivity" />
@@ -34,6 +38,7 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
+        <activity android:name=".SetFragmentActivity" />
     </application>
 
 </manifest>

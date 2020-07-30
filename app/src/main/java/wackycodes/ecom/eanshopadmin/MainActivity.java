@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.app.Dialog;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +30,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import wackycodes.ecom.eanshopadmin.database.AdminQuery;
@@ -41,7 +43,10 @@ import wackycodes.ecom.eanshopadmin.other.StaticValues;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DELIVERY_BOY;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_NAME;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.clipboardManager;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mainActivity = this;
         dialog = DialogsClass.getDialog( this );
+        // Assign ClipBoard Service...
         clipboardManager = (ClipboardManager)getSystemService( this.CLIPBOARD_SERVICE );
 
         toolbar = findViewById( R.id.appToolbar );
@@ -84,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar( toolbar );
         try {
             getSupportActionBar().setDisplayShowTitleEnabled( true );
+            getSupportActionBar().setTitle( ADMIN_DATA_MODEL.getShopName() );
+            getSupportActionBar().setSubtitle( SHOP_ID );
         }catch (NullPointerException ignored){ }
 
         // setNavigationItemSelectedListener()...
@@ -94,6 +102,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_Drawer_Open,R.string.navigation_Drawer_close);
         drawer.addDrawerListener( toggle );
         toggle.syncState();
+
+        // Drawer Variable assign...
+        drawerName = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_UserName );
+        drawerEmail = navigationView.getHeaderView( 0 ).findViewById( R.id.drawer_userEmail );
+
+        drawerName.setText( ADMIN_DATA_MODEL.getAdminName() ); // Admin Name...
+        drawerEmail.setText( ADMIN_DATA_MODEL.getAdminEmail() ); // Admin Email...
 
         // Assign...
         toolCityName = findViewById( R.id.tool_user_city );
@@ -261,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentTransaction.add( mainFrameLayout.getId(),fragment );
         fragmentTransaction.commit();
     }
-
 
 
 }
