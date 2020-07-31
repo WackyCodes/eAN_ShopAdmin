@@ -243,9 +243,10 @@ public class ProductDetails extends AppCompatActivity {
             MenuItem cartItem = menu.findItem( R.id.menu_add_another_varient );
             return true;
         }else{
-            return false;
+            return super.onCreateOptionsMenu( menu );
         }
     }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 

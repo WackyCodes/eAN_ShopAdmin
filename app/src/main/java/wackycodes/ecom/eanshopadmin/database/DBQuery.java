@@ -213,15 +213,13 @@ public class DBQuery {
                                     for (long i = 1; i <= no_of_banners; i++) {
                                         // access the banners from database...
 //                                        int clickType, String clickID, String imageLink, String nameOrExtraText, String deleteID
-                                        /*
-                                        bSliderItem.put( "banner_click_id_"+ bannerNo, bannerClickID ); // String
-                                        bSliderItem.put( "banner_click_type_"+ bannerNo, bannerClickType ); // int
-                                         */
+
                                         bannerModelList.add( new BannerModel(
-                                                -1, "ClickID",
+                                                Integer.parseInt( String.valueOf((long)documentSnapshot.get( "banner_click_type_" + i )) ),
+                                                documentSnapshot.get( "banner_click_id_" + i ).toString(),
                                                 documentSnapshot.get( "banner_" + i ).toString(),
                                                 "Extra_Text",
-                                                "delete ID" ));
+                                                documentSnapshot.get( "delete_id_" + i ).toString() ));
                                     }
                                     // add the banners list in the home recycler list...
 //                                    homeListModelList.add( new HomeListModel( SHOP_HOME_BANNER_SLIDER_CONTAINER, layout_id, visibility, bannerModelList ) );

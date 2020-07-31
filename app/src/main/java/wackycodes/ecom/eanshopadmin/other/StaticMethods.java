@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import wackycodes.ecom.eanshopadmin.R;
 
@@ -216,6 +217,45 @@ public class StaticMethods {
             showToast( context, e.getMessage() );
         }finally{
             return msg;
+        }
+    }
+
+    public static String getTimeFromNow( String dateData, String timeData ){
+        String timing =  "on " + dateData;
+        try
+        {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd wa HH:mm:ss");
+            Date past = format.parse(dateData + " wa " + timeData );
+            Date now = new Date();
+            long seconds= TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+            long minutes=TimeUnit.MILLISECONDS.toMinutes(now.getTime() - past.getTime());
+            long hours=TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
+            long days=TimeUnit.MILLISECONDS.toDays(now.getTime() - past.getTime());
+
+//          System.out.println(TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime()) + " milliseconds ago");
+
+            if(seconds<60)
+            {
+//                System.out.println(seconds+" seconds ago");
+                timing = "Just now";
+            }
+            else if(minutes<60)
+            {
+                timing = minutes + " Min ago";
+            }
+            else if(hours<24)
+            {
+                timing = hours + " Min ago";
+            }
+            else if (days < 8)
+            {
+                timing = days + " Min ago";
+            }
+        }
+        catch (Exception j){
+            j.printStackTrace();
+        }finally {
+            return timing;
         }
     }
 

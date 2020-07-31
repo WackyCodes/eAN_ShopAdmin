@@ -221,7 +221,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
         }
         private void setStripAdData(String imgLink, final String layoutID, final String clickID, final int clickType, final String deleteID, String extraText, final int index){
             layoutPosition = 1 + index;
-            indexNo.setText( "Ad Banner position : " + layoutPosition );
+            indexNo.setText( "Ad Banner \nposition : " + layoutPosition );
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                stripAdImage.setBackgroundTintList( ColorStateList.valueOf( Color.parseColor( colorCode ) ));
 //            }
@@ -241,7 +241,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
             stripAdImage.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showToast( "Code Not Found!", itemView.getContext() );
+//                    showToast( "Code Not Found!", itemView.getContext() );
 //                   Click Type
                     switch ( clickType ){
                         case BANNER_CLICK_TYPE_PRODUCT:
@@ -333,6 +333,8 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
         }
 
         private void setData(final String layoutID, List<BannerModel> catList, final int index ){
+            layoutPosition = 1 + index;
+            indexNo.setText( "position : "+ layoutPosition );
             SetCategoryItem setCategoryItem = new SetCategoryItem( catList, index );
             gridLayout.setAdapter( setCategoryItem );
             setCategoryItem.notifyDataSetChanged();
@@ -733,7 +735,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
         }
 
         private void setData(String productLayId, final String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
-
+            indexNo.setText( "position : "+ (1+index) );
             this.layoutTitle.setText( layoutTitle );
             if (productIDList.size()>=1){
                 layoutViewAllBtn.setVisibility( View.VISIBLE );
@@ -941,7 +943,7 @@ public class HomePageAdaptor extends RecyclerView.Adapter {
 
         private void setData(String productLayId, final String layoutTitle, final List<String> productIDList, List<ProductModel> productModelList, final int index){
             this.layoutTitle.setText( layoutTitle );
-
+            indexNo.setText( "position : "+ (1+index) );
             // -------------------------------------------------------------------------------------
             warningText.setText( "Add min 4 products to make visible this layout to the customers.!" );
             int gridRange;

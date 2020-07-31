@@ -202,8 +202,8 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
     private void  updateCatOnDataBase(){
 
         int imageNo = catIDNo + 1;
-        Map <String, Object> uploadMap = new HashMap <>();
-        uploadMap.put( "cat_image_"+(catIDNo+1), uploadImageLink );
+//        Map <String, Object> uploadMap = new HashMap <>();
+//        uploadMap.put( "cat_image_"+(catIDNo+1), uploadImageLink );
 
         firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID )
                 .collection( uploadCatID ).document( layoutID )
@@ -214,7 +214,8 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
                         if (task.isSuccessful()){
                             homeCatListModelList.get( catLocalIndex ).getHomeListModelList().get( layoutIndex )
                                     .getBannerModelList().get( catIDNo ).setImageLink( uploadImageLink );
-                            HomeFragment.homePageAdaptor.notifyDataSetChanged();
+                            if (HomeFragment.homePageAdaptor != null)
+                                HomeFragment.homePageAdaptor.notifyDataSetChanged();
                             showToast( AddNewImageActivity.this, "update successfully!" );
                             finish();
                         }else{
@@ -230,7 +231,7 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
     public String uploadImageLink = null;
 
     private void uploadImageOnFirebaseStorage(final Context context, final Dialog dialog, final Uri imageUri,
-                                                    final ImageView imageView, final String uploadPath, final String fileName){
+                                                    final ImageView imageView, final String uploadPath, String fileName){
         if (imageUri != null){
             final StorageReference storageRef = storageReference.child( uploadPath + "/" + fileName + ".jpg" );
 

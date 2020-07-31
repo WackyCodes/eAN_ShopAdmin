@@ -94,8 +94,9 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
                     String name = productModelList.get( position ).getProductSubModelList().get( 0 ).getpName();
                     String price = productModelList.get( position ).getProductSubModelList().get( 0 ).getpSellingPrice();
                     String cutPrice = productModelList.get( position ).getProductSubModelList().get( 0 ).getpMrpPrice();
+                    String pStocks = productModelList.get( position ).getProductSubModelList().get( 0 ).getpStocks();
                     // TODO : Case...
-                    ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, position );
+                    ((HomeHorizontalViewHolder) holder).setHomeHrProduct( productId, imgLink, name, price, cutPrice, pStocks, position );
                 }else{
                     ((HomeHorizontalViewHolder) holder).setAddNewProductView();
                 }
@@ -129,6 +130,7 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
         TextView hrProductPrice;
         TextView hrProductCutPrice;
         TextView hrProductOffPercentage;
+        TextView hrProductStocks;
 
         ConstraintLayout productView;
         LinearLayout addNewProductView;
@@ -141,13 +143,14 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
             hrProductPrice = itemView.findViewById( R.id.hr_product_price );
             hrProductCutPrice = itemView.findViewById( R.id.hr_product_cut_price );
             hrProductOffPercentage = itemView.findViewById( R.id.hr_off_percentage );
+            hrProductStocks = itemView.findViewById( R.id.stock_text );
 
             productView = itemView.findViewById( R.id.product_view_const_layout );
             addNewProductView = itemView.findViewById( R.id.product_view_linear_layout );
 
         }
 
-        private void setHomeHrProduct(final String productId,List<String> imgLink, String name, String price, String cutPrice, final int index) {
+        private void setHomeHrProduct(final String productId,List<String> imgLink, String name, String price, String cutPrice, String pStocks, final int index) {
 
             addNewProductView.setVisibility( View.GONE );
             productView.setVisibility( View.VISIBLE );
@@ -161,6 +164,15 @@ public class ProductHrGridAdaptor extends RecyclerView.Adapter <RecyclerView.Vie
 
             int perOff = ((Integer.parseInt( cutPrice ) - Integer.parseInt( price )) * 100) / Integer.parseInt( cutPrice );
             hrProductOffPercentage.setText( perOff + "% Off" );
+
+            if (Integer.parseInt( pStocks )>0){
+                hrProductStocks.setText( "In Stocks (" + pStocks + ")" );
+            }else{
+                hrProductStocks.setText( "Out Of Stocks" );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    hrProductStocks.setBackgroundTintList( itemView.getResources().getColorStateList( R.color.colorRed ) );
+                }
+            }
 
             itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
