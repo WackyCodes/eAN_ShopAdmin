@@ -13,7 +13,7 @@ import wackycodes.ecom.eanshopadmin.product.specifications.ProductDetailsSpecifi
 
 public class ProductDetailsDescriptionAdaptor extends FragmentPagerAdapter {
 
-    int totalTabs;
+    private int totalTabs;
     private String productSpecificationText;
     private List <ProductDetailsSpecificationModel> productDetailsSpecificationModelList;
 

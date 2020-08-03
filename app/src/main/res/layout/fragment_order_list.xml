@@ -7,61 +7,96 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".main.orderlist.OrderListFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/linearLayout3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:textAlignment="center"
+            android:orientation="horizontal"
             android:paddingLeft="4dp"
-            android:orientation="horizontal">
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorPrimary"
-                android:text="Order From: "/>
-            <TextView
+                android:text="List : "
+                android:textColor="@color/colorPrimary" />
+            <!--            From Date to Date...-->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
-                android:gravity="center"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="4dp"
                 android:textAlignment="center"
-                android:textColor="@color/colorBlack"
-                android:text=" 1 Jan "/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" To "/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
-                android:gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorBlack"
-                android:text=" 1 Feb "/>
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
+                    android:gravity="center"
+                    android:text=" 1 Jan "
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" To " />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
+                    android:gravity="center"
+                    android:text=" 1 Feb "
+                    android:textAlignment="center"
+                    android:textColor="@color/colorBlack" />
+            </LinearLayout>
 
             <RelativeLayout
-                android:layout_marginLeft="6dp"
-                android:padding="2dp"
-                android:background="@drawable/back_rectangle_4dp_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:background="@drawable/back_rectangle_4dp_layout"
+                android:padding="2dp">
+
                 <Spinner
+                    android:id="@+id/order_from_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:textAlignment="center"
                     android:backgroundTint="@color/colorPrimary"
-                    />
+                    android:textAlignment="center" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="6dp"
+                android:background="@drawable/back_rectangle_4dp_layout"
+                android:padding="2dp">
+
+                <Spinner
+                    android:id="@+id/sort_by_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textAlignment="center" />
             </RelativeLayout>
 
         </LinearLayout>
@@ -69,8 +104,25 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/order_list_recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
-    </LinearLayout>
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/no_order_text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/colorPrimary"
+            android:text="No Order Found!"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

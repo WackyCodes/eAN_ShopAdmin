@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,6 +29,9 @@ import wackycodes.ecom.eanshopadmin.home.HomeCatListModel;
 import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.home.HomeListModel;
 import wackycodes.ecom.eanshopadmin.home.HomePageAdaptor;
+import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListFragment;
+import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListModel;
+import wackycodes.ecom.eanshopadmin.main.orderlist.OrderProductItemModel;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 
@@ -76,6 +80,15 @@ public class DBQuery {
     </List>
 
      */
+     // Order List...
+    public static List <OrderListModel> orderListModelList = new ArrayList <>();
+    private static OrderListModel orderListModel;
+    private static List<OrderProductItemModel> orderSubList;
+
+
+     private static CollectionReference getShopCollectionRef(String collectionName){
+         return firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID ).collection( collectionName );
+     }
 
     // Get City List... // Not Required...
     public static void getCityListQuery(){ /**
@@ -344,6 +357,82 @@ public class DBQuery {
                     }
                 } );
 
+
+    }
+
+    public static void getOrderListQuery(@Nullable final Dialog dialog, String fromDate){
+
+        getShopCollectionRef( "ORDERS" )
+                .orderBy( "order_date" )
+                .whereGreaterThanOrEqualTo( "order_date", fromDate )
+                .get()
+                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        // Task...
+                        if (task.isSuccessful() && task.getResult() != null){
+                            for ( DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+                                // Assign new OrderListModel...
+                                orderListModel = new OrderListModel();
+
+                                orderListModel.setOrderID( documentSnapshot.get( "order_id" ).toString() );
+                                orderListModel.setDeliveryStatus( documentSnapshot.get( "delivery_status" ).toString() );
+                                orderListModel.setPayMode( documentSnapshot.get( "pay_mode" ).toString() );
+
+                                orderListModel.setDeliveryCharge( documentSnapshot.get( "delivery_charge" ).toString() );
+                                orderListModel.setBillingAmounts( documentSnapshot.get( "billing_amounts" ).toString() );
+
+                                orderListModel.setCustAuthID( documentSnapshot.get( "order_by_auth_id" ).toString() );
+                                orderListModel.setCustName( documentSnapshot.get( "order_by_name" ).toString() );
+                                orderListModel.setCustMobile( documentSnapshot.get( "order_by_mobile" ).toString() );
+
+                                orderListModel.setShippingName( documentSnapshot.get( "order_accepted_by" ).toString() );
+                                orderListModel.setShippingAddress( documentSnapshot.get( "order_delivery_address" ).toString() );
+                                orderListModel.setShippingPinCode( documentSnapshot.get( "order_delivery_pin" ).toString() );
+
+                                orderListModel.setOrderDate( documentSnapshot.get( "order_date" ).toString() );
+                                orderListModel.setOrderDay( documentSnapshot.get( "order_day" ).toString() );
+                                orderListModel.setOrderTime( documentSnapshot.get( "order_time" ).toString() );
+
+                                orderListModel.setDeliverySchedule( documentSnapshot.get( "delivery_schedule_time" ).toString() );
+
+                                long no_of_products = (long)documentSnapshot.get( "no_of_products" );
+
+                                orderSubList = new ArrayList <>();
+
+                                for (long ind = 0; ind < no_of_products; ind++){
+                                    orderSubList.add( new OrderProductItemModel(
+                                            documentSnapshot.getLong( "product_id_"+ind ).toString(),
+                                            documentSnapshot.getLong( "product_image_"+ind ).toString(),
+                                            documentSnapshot.getLong( "product_name_"+ind ).toString(),
+                                            documentSnapshot.getLong( "product_price_"+ind ).toString(),
+                                            documentSnapshot.getLong( "product_qty_"+ind ).toString()
+                                    ) );
+                                }
+
+                                orderListModel.setOrderProductItemsList( orderSubList );
+
+                                // add Model Item in the List...
+                                orderListModelList.add( orderListModel );
+
+                                // TODO: add data in the list...
+                                if (OrderListFragment.orderListAdaptor != null){
+                                    OrderListFragment.orderListAdaptor.notifyDataSetChanged();
+                                }
+
+                                if (dialog != null){
+                                    dialog.dismiss();
+                                }
+                            }
+
+                        }else{
+                            // Failed...
+                        }
+                        if (dialog != null){
+                            dialog.dismiss();
+                        }
+                    }
+                } );
 
     }
 

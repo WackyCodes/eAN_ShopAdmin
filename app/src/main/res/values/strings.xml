@@ -15,7 +15,6 @@
     <string name="sample_address">Shop No.5, Ratnagiri Bypass</string>
     <string name="sample_tag_line">\"We focus on quality not quantity.!\"</string>
 
-
     <string name="navigation_Drawer_Open">Open Navigation Bar</string>
     <string name="navigation_Drawer_close">Close Navigation Bar</string>
 
@@ -48,6 +47,24 @@
         <item>Dozen</item>
         <item>Pound</item>
         <item>Other</item>
+    </string-array>
+
+    <string-array name="order_from">
+        <item>Today's Order</item>
+        <item>Last 2 days</item>
+        <item>Last 5 days</item>
+        <item>Last 7 days</item>
+        <item>Last 30 days</item>
+        <!--        <item>Last 2 Months</item>-->
+        <!--        <item>Last 6 Months</item>-->
+    </string-array>
+
+    <string-array name="sort_by">
+        <item>All Orders</item>
+        <item>Failed Orders</item>
+        <item>Success Orders</item>
+        <item>Pending Orders</item>
+        <item>Ready to delivery</item>
     </string-array>
 
 

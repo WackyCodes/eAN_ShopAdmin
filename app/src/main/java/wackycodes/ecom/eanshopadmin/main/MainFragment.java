@@ -20,6 +20,7 @@ import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_ADD_SHOP;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_HOME;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_ORDER_LIST;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_SHOP;
 
 public class MainFragment extends Fragment {
@@ -47,7 +48,7 @@ public class MainFragment extends Fragment {
         // Home List...
         if (mainPageList.size() == 0){
             mainPageList.add( new MainFragmentModel( R.drawable.ic_home_black_24dp, "View Home", REQUEST_TO_VIEW_HOME ) );
-            mainPageList.add( new MainFragmentModel( R.drawable.ic_devices_black_24dp, "Order List", -1 ) );
+            mainPageList.add( new MainFragmentModel( R.drawable.ic_devices_black_24dp, "Order List", REQUEST_TO_VIEW_ORDER_LIST ) );
             mainPageList.add( new MainFragmentModel( R.drawable.ic_account_balance_black_24dp, "Income Records", -1 ) );
             mainPageList.add( new MainFragmentModel( R.drawable.ic_assignment_black_24dp, "Selling Records", -1 ) );
             mainPageList.add( new MainFragmentModel( R.drawable.ic_store_black_24dp, "My Shop", REQUEST_TO_VIEW_SHOP ) );

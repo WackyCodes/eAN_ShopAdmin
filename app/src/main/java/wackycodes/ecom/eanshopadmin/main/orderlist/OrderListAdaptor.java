@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -63,12 +64,15 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
+//        if (orderListModelList.size() == 0){
+//            OrderListFragment.no_order_text.setVisibility( View.VISIBLE );
+//        }else{
+//            OrderListFragment.no_order_text.setVisibility( View.GONE );
+//        }
         return orderListModelList.size();
     }
 
-
     //-------------------------------------------------
-
     public class OrderListViewHolder extends RecyclerView.ViewHolder {
 
         private TextView orderId;
@@ -78,6 +82,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
         private TextView orderTime;
         private TextView totalItems;
         private ImageView productImage;
+        private LinearLayout actionLayout;
 
         public OrderListViewHolder(@NonNull View itemView) {
             super( itemView );
@@ -89,10 +94,13 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             orderTime = itemView.findViewById( R.id.order_time );
             totalItems = itemView.findViewById( R.id.product_qty );
             productImage = itemView.findViewById( R.id.product_image );
+            actionLayout = itemView.findViewById( R.id.new_order_action_layout );
 
         }
 
         private void setData( String orderID, String pName, String oItemsAmounts, String oStatus,  String oDate, String oTime, int oTotalItems, String pImage ){
+
+            actionLayout.setVisibility( View.GONE );
 
             // set Image Resource from database..
             Glide.with( itemView.getContext() ).load( pImage )
@@ -116,6 +124,58 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
     }
 
+    public class NewOrderListViewHolder extends RecyclerView.ViewHolder{
+        private TextView orderId;
+        private TextView productName;
+        private TextView orderItemsAmount;
+        private TextView orderStatus;
+        private TextView orderTime;
+        private TextView totalItems;
+        private ImageView productImage;
+        private LinearLayout actionLayout;
+        private TextView rejectOrderBtn;
+        private TextView acceptOrderBtn;
+
+        public NewOrderListViewHolder(@NonNull View itemView) {
+            super( itemView );
+            orderId = itemView.findViewById( R.id.order_id );
+            productName = itemView.findViewById( R.id.product_name );
+            orderItemsAmount = itemView.findViewById( R.id.product_items_amount );
+            orderStatus = itemView.findViewById( R.id.order_status );
+            orderTime = itemView.findViewById( R.id.order_time );
+            totalItems = itemView.findViewById( R.id.product_qty );
+            productImage = itemView.findViewById( R.id.product_image );
+            actionLayout = itemView.findViewById( R.id.new_order_action_layout );
+            rejectOrderBtn = itemView.findViewById( R.id.order_reject_text );
+            acceptOrderBtn = itemView.findViewById( R.id.order_accept_text );
+        }
+
+        private void setData( String orderID, String pName, String oItemsAmounts, String oStatus,  String oDate, String oTime, int oTotalItems, String pImage ){
+
+            actionLayout.setVisibility( View.VISIBLE );
+
+            // set Image Resource from database..
+            Glide.with( itemView.getContext() ).load( pImage )
+                    .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
+
+            orderId.setText( orderID );
+            productName.setText( pName );
+            orderItemsAmount.setText( "Rs." + oItemsAmounts +"/-" );
+            orderStatus.setText( oStatus );
+            orderTime.setText( "Order " + oTime );
+            totalItems.setText( String.valueOf( oTotalItems ) );
+
+            itemView.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showToast(itemView.getContext(), "Code Not Found!");
+                }
+            } );
+
+        }
+
+
+    }
 
 
 }

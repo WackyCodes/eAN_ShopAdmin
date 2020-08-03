@@ -15,4 +15,8 @@ public class AboutShopActivity extends AppCompatActivity {
         // TODO : Set Shop Profile...
 
     }
+
+
+
+
 }

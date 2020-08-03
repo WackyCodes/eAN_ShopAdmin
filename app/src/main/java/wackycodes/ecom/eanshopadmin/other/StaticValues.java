@@ -87,6 +87,12 @@ public class StaticValues {
     public static final int REQUEST_TO_EDIT_SHOP = 2;
     public static final int REQUEST_TO_VIEW_SHOP = 3;
     public static final int REQUEST_TO_VIEW_HOME = 4;
+    public static final int REQUEST_TO_VIEW_ORDER_LIST = 5;
+    public static final int REQUEST_TO_VIEW_INCOME_RECORDS = 6;
+    public static final int REQUEST_TO_VIEW_SELLING_RECORDS = 7;
+    public static final int REQUEST_TO_VIEW_SHOP_RATING = 8;
+    public static final int REQUEST_TO_VIEW_SERVICE_AREA = 9;
+    public static final int REQUEST_TO_VIEW_FAVORITE_CUST = 10;
 
     // Fragment Code And Activity Code..
     public static final int FRAGMENT_HOME = 0;

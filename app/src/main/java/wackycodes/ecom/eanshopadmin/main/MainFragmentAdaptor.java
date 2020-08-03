@@ -12,12 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.SetFragmentActivity;
 import wackycodes.ecom.eanshopadmin.home.HomeActivity;
 import wackycodes.ecom.eanshopadmin.main.shop.AboutShopActivity;
 
 import static wackycodes.ecom.eanshopadmin.main.MainFragment.mainPageList;
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_HOME;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_ORDER_LIST;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_SHOP;
 
 public class MainFragmentAdaptor extends BaseAdapter {
@@ -71,6 +73,11 @@ public class MainFragmentAdaptor extends BaseAdapter {
             case REQUEST_TO_VIEW_HOME:
                 Intent viewHomeIntent = new Intent( context, HomeActivity.class );
                 context.startActivity( viewHomeIntent );
+                break;
+            case REQUEST_TO_VIEW_ORDER_LIST:
+                Intent orderListIntent = new Intent( context, SetFragmentActivity.class );
+                orderListIntent.putExtra( "FRAGMENT_NO", REQUEST_TO_VIEW_ORDER_LIST );
+                context.startActivity( orderListIntent );
                 break;
             default:
                 Toast.makeText( context, "Code not found!", Toast.LENGTH_SHORT ).show();

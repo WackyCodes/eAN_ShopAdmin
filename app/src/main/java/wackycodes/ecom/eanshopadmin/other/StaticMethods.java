@@ -53,6 +53,11 @@ public class StaticMethods {
         context.startActivity( intent );
     }
 
+    public static String getCrrDate(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
+        return simpleDateFormat.format(new Date());
+    }
+
     public static String getRandomNumAccordingToDate(){
         Date date =  Calendar.getInstance().getTime();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMddHHmmss", Locale.getDefault());
@@ -261,29 +266,6 @@ public class StaticMethods {
 
     /*
         // TODO : List...
-        1. Add Shop View Page
-            - Add Shop Properties
-            - permission denied
-            - Admin restrict
-            - change owner admin
-
-        2. Add New Admin
-            - Type...
-            - Permission..
-
-        3. Total Shop List with city name
-        4. Search Any shop
-        5. Add New City
-           - Add Home Page with
-           - add category layout...
-        6. Add New Shop
-            - Using new Activity
-            - add shop details
-
-        7. Add New Category
-            - Add Shop container with..
-
-        8. Add Accept Request of Shop...
 
 
      */

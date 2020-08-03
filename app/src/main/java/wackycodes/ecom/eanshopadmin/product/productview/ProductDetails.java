@@ -175,11 +175,10 @@ public class ProductDetails extends AppCompatActivity {
         // set adapter with viewpager...
         productDetailsImagesAdapter = new ProductDetailsImagesAdapter( productImageList );
         productImagesViewPager.setAdapter( productDetailsImagesAdapter );
-
-
         // connect TabLayout with viewPager...
         productImagesIndicator.setupWithViewPager( productImagesViewPager, true );
-        //----------- Product Images ---
+
+        //----------- Product Description ---
         productDescriptionViewPager.addOnPageChangeListener(
                 new TabLayout.TabLayoutOnPageChangeListener( productDescriptionIndicator ) );
         productDescriptionIndicator.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
