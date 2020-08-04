@@ -93,6 +93,7 @@ public class StaticValues {
     public static final int REQUEST_TO_VIEW_SHOP_RATING = 8;
     public static final int REQUEST_TO_VIEW_SERVICE_AREA = 9;
     public static final int REQUEST_TO_VIEW_FAVORITE_CUST = 10;
+    public static final int REQUEST_TO_NOTIFY_NEW_ORDER = 11;
 
     // Fragment Code And Activity Code..
     public static final int FRAGMENT_HOME = 0;
@@ -106,5 +107,10 @@ public class StaticValues {
     public static final int VIEW_GRID_LAYOUT = 2;
     public static final int VIEW_PRODUCT_SEARCH_LAYOUT = 3;
 
+    // Order List Type for Local Use...
+    public static final int ORDER_LIST_CHECK = 0;
+    public static final int ORDER_LIST_NEW_ORDER = 1;
+    public static final int ORDER_LIST_PREPARING = 2;
+    public static final int ORDER_LIST_READY_TO_DELIVER = 3;
 
 }

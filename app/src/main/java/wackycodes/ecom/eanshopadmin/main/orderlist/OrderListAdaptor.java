@@ -9,6 +9,7 @@ package wackycodes.ecom.eanshopadmin.main.orderlist;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,6 +25,10 @@ import java.util.List;
 import wackycodes.ecom.eanshopadmin.R;
 
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_CHECK;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_NEW_ORDER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_PREPARING;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_READY_TO_DELIVER;
 
 /**
  * Created by Shailendra (WackyCodes) on 31/07/2020 21:21
@@ -32,17 +37,33 @@ import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 public class OrderListAdaptor extends RecyclerView.Adapter {
 
     private List <OrderListModel> orderListModelList;
+    private int listType;
 
-    public OrderListAdaptor(List <OrderListModel> orderListModelList) {
+    public OrderListAdaptor(List <OrderListModel> orderListModelList, int listType) {
         this.orderListModelList = orderListModelList;
+        this.listType = listType;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view =  LayoutInflater.from( parent.getContext() ).inflate(
-                R.layout.order_list_layout_item, parent, false );
-        return new OrderListViewHolder(view);
+        switch (listType){
+            case ORDER_LIST_CHECK:
+                View orderListView =  LayoutInflater.from( parent.getContext() ).inflate(
+                        R.layout.order_list_layout_item, parent, false );
+                return new OrderListViewHolder(orderListView);
+
+            case ORDER_LIST_NEW_ORDER:
+            case ORDER_LIST_PREPARING:
+            case ORDER_LIST_READY_TO_DELIVER:
+                View newOrderListView =  LayoutInflater.from( parent.getContext() ).inflate(
+                        R.layout.new_order_list_layout_item, parent, false );
+                return new NewOrderListViewHolder(newOrderListView);
+
+            default:
+                return null;
+        }
+
     }
 
     @Override
@@ -57,9 +78,20 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
         String oTime = orderListModel.getOrderTime();
         int oTotalItems = orderListModel.getOrderProductItemsList().size();
         String pImage = orderListModel.getOrderProductItemsList().get( 0 ).getProductImage();
+        switch (listType){
+            case ORDER_LIST_CHECK:
+                // TODO : Set Data...
+                ((OrderListViewHolder)holder).setData( orderID, pName, oItemsAmounts, oStatus, oDate, oTime, oTotalItems, pImage );
+                break;
+            case ORDER_LIST_NEW_ORDER:
+            case ORDER_LIST_PREPARING:
+            case ORDER_LIST_READY_TO_DELIVER:
+                ((NewOrderListViewHolder)holder).setData( orderID, pName, oItemsAmounts, oStatus, oDate, oTime, oTotalItems, pImage );
+                break;
+            default:
+                break;
+        }
 
-        // TODO : Set Data...
-        ((OrderListViewHolder)holder).setData( orderID, pName, oItemsAmounts, oStatus, oDate, oTime, oTotalItems, pImage );
     }
 
     @Override
@@ -82,7 +114,6 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
         private TextView orderTime;
         private TextView totalItems;
         private ImageView productImage;
-        private LinearLayout actionLayout;
 
         public OrderListViewHolder(@NonNull View itemView) {
             super( itemView );
@@ -94,15 +125,15 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             orderTime = itemView.findViewById( R.id.order_time );
             totalItems = itemView.findViewById( R.id.product_qty );
             productImage = itemView.findViewById( R.id.product_image );
-            actionLayout = itemView.findViewById( R.id.new_order_action_layout );
 
         }
 
         private void setData( String orderID, String pName, String oItemsAmounts, String oStatus,  String oDate, String oTime, int oTotalItems, String pImage ){
 
-            actionLayout.setVisibility( View.GONE );
-
             // set Image Resource from database..
+            // Current Date : "yyyy/MM/dd"
+            // Current Time : "HH:mm"
+
             Glide.with( itemView.getContext() ).load( pImage )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
 
@@ -132,9 +163,17 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
         private TextView orderTime;
         private TextView totalItems;
         private ImageView productImage;
-        private LinearLayout actionLayout;
+        // New Order Action Layout...
+        private LinearLayout newOrderActionLayout;
         private TextView rejectOrderBtn;
         private TextView acceptOrderBtn;
+        // Order Preparing Text Button...
+        private TextView packingTextBtn;
+        // Out For Delivery Layout...
+        private LinearLayout outForDeliveryLayout;
+        private EditText outForDeliveryPinEt;
+        private TextView outForDeliveryBtn;
+        //
 
         public NewOrderListViewHolder(@NonNull View itemView) {
             super( itemView );
@@ -145,16 +184,43 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             orderTime = itemView.findViewById( R.id.order_time );
             totalItems = itemView.findViewById( R.id.product_qty );
             productImage = itemView.findViewById( R.id.product_image );
-            actionLayout = itemView.findViewById( R.id.new_order_action_layout );
+            // ---
+            newOrderActionLayout = itemView.findViewById( R.id.new_order_action_layout );
             rejectOrderBtn = itemView.findViewById( R.id.order_reject_text );
             acceptOrderBtn = itemView.findViewById( R.id.order_accept_text );
+            // ------
+            packingTextBtn = itemView.findViewById( R.id.preparing_packing_text_btn );
+            // ---
+            outForDeliveryLayout = itemView.findViewById( R.id.new_order_out_for_delivery_layout );
+            outForDeliveryPinEt = itemView.findViewById( R.id.out_for_delivery_pin_et );
+            outForDeliveryBtn = itemView.findViewById( R.id.out_for_delivery_text_btn );
+
         }
 
         private void setData( String orderID, String pName, String oItemsAmounts, String oStatus,  String oDate, String oTime, int oTotalItems, String pImage ){
 
-            actionLayout.setVisibility( View.VISIBLE );
+            // Decide based On List Type...
+            switch (listType){
+                case ORDER_LIST_NEW_ORDER:
+                    newOrderActionLayout.setVisibility( View.VISIBLE );
+                    packingTextBtn.setVisibility( View.GONE );
+                    outForDeliveryLayout.setVisibility( View.GONE );
+                    break;
+                case ORDER_LIST_PREPARING:
+                    newOrderActionLayout.setVisibility( View.GONE );
+                    packingTextBtn.setVisibility( View.VISIBLE );
+                    outForDeliveryLayout.setVisibility( View.GONE );
+                    break;
+                case ORDER_LIST_READY_TO_DELIVER:
+                    newOrderActionLayout.setVisibility( View.GONE );
+                    packingTextBtn.setVisibility( View.GONE );
+                    outForDeliveryLayout.setVisibility( View.VISIBLE );
+                    break;
+                default:
+                    break;
+            }
 
-            // set Image Resource from database..
+            // set Image Resource from database...
             Glide.with( itemView.getContext() ).load( pImage )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
 

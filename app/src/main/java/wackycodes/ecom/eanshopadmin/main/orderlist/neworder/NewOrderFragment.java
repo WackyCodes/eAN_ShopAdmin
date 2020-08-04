@@ -33,12 +33,9 @@ public class NewOrderFragment extends Fragment {
     }
 
     private Dialog dialog;
-    public static TextView no_order_text;
-
 
     private ViewPager newOrderViewPager;
     private TabLayout newOrderTabLayoutIndicator;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,14 +43,6 @@ public class NewOrderFragment extends Fragment {
         View view = inflater.inflate( R.layout.fragment_new_order, container, false );
 
         dialog = DialogsClass.getDialog( getContext() );
-        // Assign ...
-        no_order_text = view.findViewById( R.id.no_order_text );
-
-        // Set Layout Manager..
-//        LinearLayoutManager layoutManager = new LinearLayoutManager( view.getContext() );
-//        layoutManager.setOrientation( RecyclerView.VERTICAL );
-//        newOrderRecycler.setLayoutManager( layoutManager );
-
         // ----------
         newOrderViewPager = view.findViewById( R.id.new_order_view_pager );
         newOrderTabLayoutIndicator = view.findViewById( R.id.new_order_tab_layout );
@@ -76,13 +65,24 @@ public class NewOrderFragment extends Fragment {
             }
         } );
 
-
-//        ProductDetailsDescriptionAdaptor productDetailsDescriptionAdaptor
-//                                    = new ProductDetailsDescriptionAdaptor( );
-//        newOrderViewPager.setAdapter( productDetailsDescriptionAdaptor );
-//        productDetailsDescriptionAdaptor.notifyDataSetChanged();
+        NewOrderTabAdaptor newOrderTabAdaptor
+                                    = new NewOrderTabAdaptor( getActivity().getSupportFragmentManager(), newOrderTabLayoutIndicator.getTabCount() );
+        newOrderViewPager.setAdapter( newOrderTabAdaptor );
+        newOrderTabAdaptor.notifyDataSetChanged();
 
         return view;
     }
+
+    /**  Order Status
+     *          1. WAITING - ( For Accept )
+     *          2. ACCEPTED - ( Preparing )
+     *          3. PACKED - ( Waiting for Delivery ) READY_TO_DELIVERY
+     *          4. PROCESS  - ( On Delivery ) OUT_FOR_DELIVERY
+     *          5. SUCCESS - Success Full Delivered..!
+     *          6. CANCELLED -  When Order has been cancelled by user...
+     *          7. FAILED -  when PayMode Online and payment has been failed...
+     *          8. PENDING - when Payment is Pending...
+     *
+     */
 
 }

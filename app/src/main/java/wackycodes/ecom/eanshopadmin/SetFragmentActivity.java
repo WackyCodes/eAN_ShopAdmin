@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListFragment;
+import wackycodes.ecom.eanshopadmin.main.orderlist.neworder.NewOrderFragment;
 
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_INCOME_RECORDS;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_ORDER_LIST;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_SELLING_RECORDS;
@@ -34,7 +36,7 @@ public class SetFragmentActivity extends AppCompatActivity {
         setContentView( R.layout.activity_set_fragment );
         setFragmentActivity = this;
 
-        int frgment_no = getIntent().getIntExtra( "FRAGMENT_NO", -1 );
+        int fragment_no = getIntent().getIntExtra( "FRAGMENT_NO", -1 );
 
         toolbar = findViewById( R.id.appToolbar );
         setSupportActionBar( toolbar );
@@ -46,9 +48,14 @@ public class SetFragmentActivity extends AppCompatActivity {
         // Assign Variables...
         frameLayout = findViewById( R.id.set_fragment_frame_layout );
 
-        switch (frgment_no){
+        switch (fragment_no){
             case REQUEST_TO_VIEW_ORDER_LIST:
                 setFragment(new OrderListFragment());
+                getSupportActionBar().setTitle( "Order List" );
+                break;
+            case REQUEST_TO_NOTIFY_NEW_ORDER:
+                setFragment( new NewOrderFragment() );
+                getSupportActionBar().setTitle( "New Orders" );
                 break;
             case REQUEST_TO_VIEW_INCOME_RECORDS:
             case REQUEST_TO_VIEW_SELLING_RECORDS:

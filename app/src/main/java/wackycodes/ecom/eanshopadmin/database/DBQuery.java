@@ -85,6 +85,11 @@ public class DBQuery {
     private static OrderListModel orderListModel;
     private static List<OrderProductItemModel> orderSubList;
 
+    // new Order List...
+    public static List <OrderListModel> newOrderList = new ArrayList <>();
+    public static List <OrderListModel> preparingOrderList = new ArrayList <>();
+    public static List <OrderListModel> readyToDeliveredList = new ArrayList <>();
+
 
      private static CollectionReference getShopCollectionRef(String collectionName){
          return firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID ).collection( collectionName );

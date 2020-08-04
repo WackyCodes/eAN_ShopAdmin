@@ -45,6 +45,7 @@ import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DELIVERY_BOY;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_NAME;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.clipboardManager;
@@ -160,12 +161,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         cartItem.getActionView().setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // GOTO : My cart
-//                if (currentUser == null){
-//                    DialogsClass.signInUpDialog( MainActivity.this, MAIN_ACTIVITY );
-//                }else{
-//                    gotoCart();
-//                }
+                // GOTO : New Order....
+                Intent orderListIntent = new Intent( MainActivity.this, SetFragmentActivity.class );
+                orderListIntent.putExtra( "FRAGMENT_NO", REQUEST_TO_NOTIFY_NEW_ORDER );
+                startActivity( orderListIntent );
             }
         } );
 

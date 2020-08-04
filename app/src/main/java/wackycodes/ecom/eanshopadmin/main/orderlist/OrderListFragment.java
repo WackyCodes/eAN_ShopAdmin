@@ -25,6 +25,7 @@ import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 
 import static wackycodes.ecom.eanshopadmin.SetFragmentActivity.setFragmentActivity;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.orderListModelList;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_CHECK;
 
 /**
  * Created by Shailendra (WackyCodes) on 30/07/2020 23:02
@@ -69,7 +70,7 @@ public class OrderListFragment extends Fragment {
         orderListRecycler.setLayoutManager( layoutManager );
 
         // set Adaptor...
-        orderListAdaptor = new OrderListAdaptor( orderListModelList );
+        orderListAdaptor = new OrderListAdaptor( orderListModelList, ORDER_LIST_CHECK );
         orderListRecycler.setAdapter( orderListAdaptor );
         orderListAdaptor.notifyDataSetChanged();
 
