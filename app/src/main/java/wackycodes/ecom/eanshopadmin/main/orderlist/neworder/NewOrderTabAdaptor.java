@@ -53,45 +53,57 @@ public class NewOrderTabAdaptor extends FragmentPagerAdapter {
                 // Case for New Order List... ORDER_LIST_NEW_ORDER
                 /* So Here we have to filter our list first..! and Set it in adaptor.../ Fragment.. */
                 if (newOrderFragment == null){
-                    newOrderFragment = new OrderViewPagerFragment();
+                    newOrderFragment = new OrderViewPagerFragment(newOrderList, ORDER_LIST_NEW_ORDER );
                 }
-                newOrderFragment.orderViewPagerListAdaptor = new OrderListAdaptor( newOrderList, ORDER_LIST_NEW_ORDER );
-                newOrderFragment.orderViewPagerRecyclerView.setAdapter( newOrderFragment.orderViewPagerListAdaptor );
-                newOrderFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
-                if (newOrderList.size() == 0){
-                    newOrderFragment.noOrderText.setVisibility( View.VISIBLE );
-                }else{
-                    newOrderFragment.noOrderText.setVisibility( View.GONE );
+                if (newOrderFragment.orderViewPagerListAdaptor!=null){
+                    newOrderFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
+
                 return newOrderFragment;
             case 1:
-                // Case for Preparing Order List... ORDER_LIST_PREPARING
                 if (preparingFragment == null){
-                    preparingFragment = new OrderViewPagerFragment();
+                    preparingFragment = new OrderViewPagerFragment(preparingOrderList, ORDER_LIST_PREPARING );
                 }
-                preparingFragment.orderViewPagerListAdaptor = new OrderListAdaptor( preparingOrderList, ORDER_LIST_PREPARING );
-                preparingFragment.orderViewPagerRecyclerView.setAdapter( preparingFragment.orderViewPagerListAdaptor );
-                preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
-                if (preparingOrderList.size() == 0){
-                    preparingFragment.noOrderText.setVisibility( View.VISIBLE );
-                }else{
-                    preparingFragment.noOrderText.setVisibility( View.GONE );
+                if (preparingFragment.orderViewPagerListAdaptor!=null){
+                    preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
+
                 return preparingFragment;
+                // Case for Preparing Order List... ORDER_LIST_PREPARING
+//                if (preparingFragment == null){
+//                    preparingFragment = new OrderViewPagerFragment();
+//                }
+//                preparingFragment.orderViewPagerListAdaptor = new OrderListAdaptor( preparingOrderList, ORDER_LIST_PREPARING );
+//                preparingFragment.orderViewPagerRecyclerView.setAdapter( preparingFragment.orderViewPagerListAdaptor );
+//                preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
+//                if (preparingOrderList.size() == 0){
+//                    preparingFragment.noOrderText.setVisibility( View.VISIBLE );
+//                }else{
+//                    preparingFragment.noOrderText.setVisibility( View.GONE );
+//                }
+//                return preparingFragment;
             case 2:
-                // Case for Ready to delivery Order List... ORDER_LIST_READY_TO_DELIVER
                 if (readyToDeliverFragment == null){
-                    readyToDeliverFragment = new OrderViewPagerFragment();
+                    readyToDeliverFragment = new OrderViewPagerFragment(readyToDeliveredList, ORDER_LIST_READY_TO_DELIVER );
                 }
-                readyToDeliverFragment.orderViewPagerListAdaptor = new OrderListAdaptor( readyToDeliveredList, ORDER_LIST_READY_TO_DELIVER );
-                readyToDeliverFragment.orderViewPagerRecyclerView.setAdapter( readyToDeliverFragment.orderViewPagerListAdaptor );
-                readyToDeliverFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
-                if (readyToDeliveredList.size() == 0){
-                    readyToDeliverFragment.noOrderText.setVisibility( View.VISIBLE );
-                }else{
-                    readyToDeliverFragment.noOrderText.setVisibility( View.GONE );
+                if (readyToDeliverFragment.orderViewPagerListAdaptor!=null){
+                    readyToDeliverFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
+
                 return readyToDeliverFragment;
+                // Case for Ready to delivery Order List... ORDER_LIST_READY_TO_DELIVER
+//                if (readyToDeliverFragment == null){
+//                    readyToDeliverFragment = new OrderViewPagerFragment();
+//                }
+//                readyToDeliverFragment.orderViewPagerListAdaptor = new OrderListAdaptor( readyToDeliveredList, ORDER_LIST_READY_TO_DELIVER );
+//                readyToDeliverFragment.orderViewPagerRecyclerView.setAdapter( readyToDeliverFragment.orderViewPagerListAdaptor );
+//                readyToDeliverFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
+//                if (readyToDeliveredList.size() == 0){
+//                    readyToDeliverFragment.noOrderText.setVisibility( View.VISIBLE );
+//                }else{
+//                    readyToDeliverFragment.noOrderText.setVisibility( View.GONE );
+//                }
+//                return readyToDeliverFragment;
             default:
                 return null;
         }

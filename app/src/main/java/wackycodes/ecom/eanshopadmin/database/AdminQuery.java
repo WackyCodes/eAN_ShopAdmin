@@ -29,6 +29,7 @@ import wackycodes.ecom.eanshopadmin.other.StaticValues;
 import static wackycodes.ecom.eanshopadmin.MainActivity.badgeNotifyCount;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFICATION;
 
 public class AdminQuery {
 
@@ -119,7 +120,7 @@ public class AdminQuery {
                                     badgeNotifyCount.setVisibility( View.VISIBLE );
                                     badgeNotifyCount.setText( cartCount + "" );
                                     if ( context!=null ){
-                                        DialogsClass.setAlarmOnNotification( context, "Notification", "You have "+cartCount +" new notification!" );
+                                        DialogsClass.setAlarmOnNotification( context, "Notification", "You have "+cartCount +" new notification!", REQUEST_TO_NOTIFICATION );
                                     }
                                 }else{
                                     badgeNotifyCount.setVisibility( View.GONE );

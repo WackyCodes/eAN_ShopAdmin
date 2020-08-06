@@ -12,8 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
 import wackycodes.ecom.eanshopadmin.R;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListAdaptor;
+import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListModel;
 
 /*
  * Copyright (c) 2020.
@@ -28,6 +31,15 @@ public class OrderViewPagerFragment extends Fragment {
 
     public OrderViewPagerFragment() {
         // Required empty public constructor
+    }
+
+    private List <OrderListModel> orderListModelList;
+    private int listType;
+
+    public OrderViewPagerFragment(List <OrderListModel> orderListModelList, int listType) {
+        // Required empty public constructor
+        this.orderListModelList = orderListModelList;
+        this.listType = listType;
     }
 
     public OrderListAdaptor orderViewPagerListAdaptor;
@@ -45,6 +57,16 @@ public class OrderViewPagerFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager( view.getContext() );
         layoutManager.setOrientation( RecyclerView.VERTICAL );
         orderViewPagerRecyclerView.setLayoutManager( layoutManager );
+
+        orderViewPagerListAdaptor = new OrderListAdaptor( orderListModelList, listType );
+        orderViewPagerRecyclerView.setAdapter( orderViewPagerListAdaptor );
+        orderViewPagerListAdaptor.notifyDataSetChanged();
+
+        if (orderListModelList.size() == 0){
+            noOrderText.setVisibility( View.VISIBLE );
+        }else{
+            noOrderText.setVisibility( View.GONE );
+        }
 
         return view;
     }

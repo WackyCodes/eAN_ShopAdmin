@@ -42,6 +42,7 @@ import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.StaticValues;
 
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.homeCatListModelList;
+import static wackycodes.ecom.eanshopadmin.database.DBQuery.newOrderList;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DELIVERY_BOY;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_NAME;
@@ -141,6 +142,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         // Notification Loading...
 //        AdminQuery.loadNotificationsQuery( this );
+
+        // New Orders Loading...
+        DBQuery.getNewOrderQuery(this);
+
     }
 
     // --------  Menu And Navigation....
@@ -154,10 +159,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuItem cartItem = menu.findItem( R.id.menu_order_main );
         cartItem.setActionView( R.layout.badge_order_layout );
         badgeOrderCount = cartItem.getActionView().findViewById( R.id.badge_order_count_text );
-//        if (UserDataQuery.cartItemModelList.size() > 0){
-//            badgeOrderCount.setVisibility( View.VISIBLE );
-//            badgeOrderCount.setText( String.valueOf( UserDataQuery.cartItemModelList.size() ) );
-//        }
+        if (newOrderList.size()>0){
+            badgeOrderCount.setVisibility( View.VISIBLE );
+            badgeOrderCount.setText( newOrderList.size() + "" );
+        }else{
+            badgeOrderCount.setVisibility( View.GONE );
+        }
         cartItem.getActionView().setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {

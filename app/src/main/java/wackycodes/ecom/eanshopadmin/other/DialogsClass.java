@@ -3,12 +3,17 @@ package wackycodes.ecom.eanshopadmin.other;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -19,7 +24,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.SetFragmentActivity;
+
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 
 public class DialogsClass {
 
@@ -75,18 +84,57 @@ public class DialogsClass {
     }
 
 
-    public static void setAlarmOnNotification(Context context, String notifyTitle, String notifyBody){
-        Uri alarmSound = RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
-        MediaPlayer mp = MediaPlayer. create ( context, alarmSound );
-        mp.start();
+    public static void setAlarmOnNotification(Context context, String notifyTitle, String notifyBody , int notifyType){
+        // Default Sound..
+        Uri alarmSound = RingtoneManager. getDefaultUri (RingtoneManager.TYPE_NOTIFICATION );
+//        MediaPlayer mp = MediaPlayer. create ( context, alarmSound );
+//        mp.start();
+
+        // Vibrate...
+        Vibrator vibrator = (Vibrator) context.getSystemService( Context.VIBRATOR_SERVICE );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate( VibrationEffect.createOneShot( 200, VibrationEffect.DEFAULT_AMPLITUDE ) );
+        }else{
+            vibrator.vibrate( 200 );
+        }
+
+        // create Builder and set message...
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context, "default" )
                         .setSmallIcon( R.mipmap.logo_round )
                         .setContentTitle( notifyTitle )
                         .setContentText( notifyBody ) ;
+        // Set Notification Sound...
+        mBuilder.setSound( alarmSound, AudioManager.STREAM_NOTIFICATION );
+
+        // Create Intent and Set Action...
+        Intent intent = new Intent( context, SetFragmentActivity.class );
+        intent.putExtra( "FRAGMENT_NO", notifyType ); // REQUEST_TO_NOTIFY_NEW_ORDER
+        final PendingIntent resultIntent = PendingIntent.getActivity(
+                context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT
+        );
+        mBuilder.addAction( R.mipmap.logo_round, "Add", resultIntent );
+        mBuilder.setContentIntent( resultIntent );
+
 //        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context. NOTIFICATION_SERVICE );
         NotificationManager mNotificationManager = (NotificationManager)context.getSystemService( Context.NOTIFICATION_SERVICE );
         mNotificationManager.notify(( int ) System. currentTimeMillis() , mBuilder.build());
+    }
+
+    private void setActionOnNotification(Context context){
+
+        Intent intent = new Intent( context, MainActivity.class );
+
+        final PendingIntent resultIntent = PendingIntent.getActivity(
+                context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT
+        );
+
+        // Now Set it On Builder...
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(context, "default" );
+        mBuilder.addAction( R.mipmap.logo_round, "Add", resultIntent );
+        mBuilder.setContentIntent( resultIntent );
+
     }
 
 

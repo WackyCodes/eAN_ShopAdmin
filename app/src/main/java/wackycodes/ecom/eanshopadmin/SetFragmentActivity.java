@@ -3,6 +3,7 @@ package wackycodes.ecom.eanshopadmin;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import androidx.fragment.app.FragmentTransaction;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListFragment;
 import wackycodes.ecom.eanshopadmin.main.orderlist.neworder.NewOrderFragment;
 
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFICATION;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_INCOME_RECORDS;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_VIEW_ORDER_LIST;
@@ -59,6 +61,9 @@ public class SetFragmentActivity extends AppCompatActivity {
                 break;
             case REQUEST_TO_VIEW_INCOME_RECORDS:
             case REQUEST_TO_VIEW_SELLING_RECORDS:
+            case REQUEST_TO_NOTIFICATION:
+                showToast("Content Not Found!");
+                break;
             default:
                 break;
         }
@@ -87,6 +92,10 @@ public class SetFragmentActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add( frameLayout.getId(),fragment );
         fragmentTransaction.commit();
+    }
+
+    private void showToast(String msg){
+        Toast.makeText( this, msg, Toast.LENGTH_SHORT ).show();
     }
 
 }

@@ -3,6 +3,7 @@ package wackycodes.ecom.eanshopadmin.database;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Build;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,7 +16,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -25,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.MainActivity;
+import wackycodes.ecom.eanshopadmin.admin.notification.NotificationModel;
 import wackycodes.ecom.eanshopadmin.home.HomeCatListModel;
 import wackycodes.ecom.eanshopadmin.home.HomeFragment;
 import wackycodes.ecom.eanshopadmin.home.HomeListModel;
@@ -33,12 +39,17 @@ import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListFragment;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListModel;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderProductItemModel;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
+import wackycodes.ecom.eanshopadmin.other.DialogsClass;
+import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 import wackycodes.ecom.eanshopadmin.product.ProductModel;
 
+import static wackycodes.ecom.eanshopadmin.MainActivity.badgeOrderCount;
 import static wackycodes.ecom.eanshopadmin.MainActivity.mainActivity;
+import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_STRIP_AD_CONTAINER;
@@ -407,11 +418,11 @@ public class DBQuery {
 
                                 for (long ind = 0; ind < no_of_products; ind++){
                                     orderSubList.add( new OrderProductItemModel(
-                                            documentSnapshot.getLong( "product_id_"+ind ).toString(),
-                                            documentSnapshot.getLong( "product_image_"+ind ).toString(),
-                                            documentSnapshot.getLong( "product_name_"+ind ).toString(),
-                                            documentSnapshot.getLong( "product_price_"+ind ).toString(),
-                                            documentSnapshot.getLong( "product_qty_"+ind ).toString()
+                                            documentSnapshot.get( "product_id_"+ind ).toString(),
+                                            documentSnapshot.get( "product_image_"+ind ).toString(),
+                                            documentSnapshot.get( "product_name_"+ind ).toString(),
+                                            documentSnapshot.get( "product_price_"+ind ).toString(),
+                                            documentSnapshot.get( "product_qty_"+ind ).toString()
                                     ) );
                                 }
 
@@ -441,6 +452,95 @@ public class DBQuery {
 
     }
 
+    public static ListenerRegistration newOrderNotificationLR;
+    public static void getNewOrderQuery(final Context context){
+        // yyyyMMddHHmmss
+       final String fromIndex = StaticMethods.getDateUnder31(2).replace( "/", "" ).trim() + "000000";
+
+//       showToast(context, fromIndex);
+
+        newOrderNotificationLR = getShopCollectionRef( "ORDERS" )
+                .orderBy( "index", Query.Direction.DESCENDING )
+                .whereGreaterThanOrEqualTo( "index", fromIndex )
+//                .limit(  ) //order_time. order_date
+                .addSnapshotListener( new EventListener <QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (queryDocumentSnapshots != null ) {
+                            int cartCount = 0;
+//                            newOrderList.clear();
+                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()){
+                                String deliveryStatus = documentSnapshot.get( "delivery_status" ).toString();
+                                if (deliveryStatus.toUpperCase().equals( "WAITING" )){
+                                    // Assign new OrderListModel...
+                                    orderListModel = new OrderListModel();
+
+                                    orderListModel.setOrderID( documentSnapshot.get( "order_id" ).toString() );
+                                    orderListModel.setDeliveryStatus( documentSnapshot.get( "delivery_status" ).toString() );
+                                    orderListModel.setPayMode( documentSnapshot.get( "pay_mode" ).toString() );
+
+                                    orderListModel.setDeliveryCharge( documentSnapshot.get( "delivery_charge" ).toString() );
+                                    orderListModel.setBillingAmounts( documentSnapshot.get( "billing_amounts" ).toString() );
+
+                                    orderListModel.setCustAuthID( documentSnapshot.get( "order_by_auth_id" ).toString() );
+                                    orderListModel.setCustName( documentSnapshot.get( "order_by_name" ).toString() );
+                                    orderListModel.setCustMobile( documentSnapshot.get( "order_by_mobile" ).toString() );
+
+                                    orderListModel.setShippingName( documentSnapshot.get( "order_accepted_by" ).toString() );
+                                    orderListModel.setShippingAddress( documentSnapshot.get( "order_delivery_address" ).toString() );
+                                    orderListModel.setShippingPinCode( documentSnapshot.get( "order_delivery_pin" ).toString() );
+
+                                    orderListModel.setOrderDate( documentSnapshot.get( "order_date" ).toString() );
+                                    orderListModel.setOrderDay( documentSnapshot.get( "order_day" ).toString() );
+                                    orderListModel.setOrderTime( documentSnapshot.get( "order_time" ).toString() );
+
+                                    orderListModel.setDeliverySchedule( documentSnapshot.get( "delivery_schedule_time" ).toString() );
+
+                                    long no_of_products = (long)documentSnapshot.get( "no_of_products" );
+
+                                    orderSubList = new ArrayList <>();
+
+                                    for (long ind = 0; ind < no_of_products; ind++){
+                                        orderSubList.add( new OrderProductItemModel(
+                                                documentSnapshot.get( "product_id_"+ind ).toString(),
+                                                documentSnapshot.get( "product_image_"+ind ).toString(),
+                                                documentSnapshot.get( "product_name_"+ind ).toString(),
+                                                documentSnapshot.get( "product_price_"+ind ).toString(),
+                                                documentSnapshot.get( "product_qty_"+ind ).toString()
+                                        ) );
+                                    }
+
+                                    orderListModel.setOrderProductItemsList( orderSubList );
+
+//                                    newOrderList.add( orderListModel );
+                                    // add Model in the new Order List...
+                                    if (!newOrderList.contains( orderListModel )){
+                                        newOrderList.add( orderListModel );
+                                        cartCount++;
+                                    }
+
+                                }
+
+                                if (badgeOrderCount != null)
+                                    if (newOrderList.size()>0){
+                                        badgeOrderCount.setVisibility( View.VISIBLE );
+                                        badgeOrderCount.setText( newOrderList.size() + "" );
+                                    }else{
+                                        badgeOrderCount.setVisibility( View.GONE );
+                                    }
+                            }
+                            if ( context!=null && cartCount > 0){
+                                DialogsClass.setAlarmOnNotification( context, "New Order",
+                                        "You have "+ cartCount +" new Orders!", REQUEST_TO_NOTIFY_NEW_ORDER );
+                            }
+
+
+                        }
+                    }
+                } );
+
+
+    }
 
 
 }

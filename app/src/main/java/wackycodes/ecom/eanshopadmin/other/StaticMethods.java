@@ -67,6 +67,12 @@ public class StaticMethods {
         return crrDateDay;
     }
 
+    public static String getRandomIndex(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
+        String randomIndex = simpleDateFormat.format(new Date()) ;
+        return randomIndex;
+    }
+
     public static String getTwoDigitRandom(){
         Random random = new Random();
         // Generate random integers in range 0 to 9999
@@ -263,6 +269,99 @@ public class StaticMethods {
             return timing;
         }
     }
+
+
+    public static String getDateUnder31( int situation)
+    {
+         /*
+           <item>Today's Order</item>
+        <item>Last 2 days</item>
+        <item>Last 5 days</item>
+        <item>Last 7 days</item>
+        <item>Last 30 days</item>
+        // Not use yet.!
+        <item>Last 2 Months</item>
+        <item>Last 6 Months</item>
+         */
+        String currDate = StaticMethods.getCrrDate(); // "yyyy/MM/dd"
+        String[] arr = currDate.split( "/" );
+        int yearVal = Integer.valueOf (arr[0] );
+        int monthVal = Integer.valueOf (arr[1] );
+        int dayVal = Integer.valueOf (arr[2] );
+//        int yearVal = Integer.valueOf ( currDate.substring( 0, 4 ) );
+//        int monthVal = Integer.valueOf (  currDate.substring( 5, 7 ) );
+//        int dayVal = Integer.valueOf( currDate.substring( 8 ) );
+
+        // Suppose .. situation is under 30 Days
+
+        // Check dayVal < situation ( 3 < 4 )
+        // dayVal = 29 - (situation - dayVal);
+
+        if ( dayVal <= situation ){
+            if (monthVal == 5 || monthVal == 7 || monthVal == 10 || monthVal == 12 ){
+                monthVal = monthVal - 1;
+                dayVal = 30 - (situation - dayVal);
+            }
+            else if (monthVal == 3){
+                if (yearVal % 4 == 0){
+                    dayVal = 29 - (situation - dayVal);
+                }else{
+                    dayVal = 28 - (situation - dayVal);
+                }
+                monthVal = monthVal - 1;
+            }
+            else {
+                /*
+                        if (monthVal == 1 || monthVal == 2 || monthVal == 4 || monthVal == 6
+                     || monthVal == 8 || monthVal == 9 || monthVal == 11){...}
+                         */
+                if (monthVal == 1){
+                    yearVal = yearVal - 1;
+                    monthVal = 12;
+                }else{
+                    monthVal = monthVal - 1;
+                }
+                dayVal = 31 - (situation - dayVal); // it is included to get data...
+            }
+
+            currDate = String.valueOf( yearVal );
+
+            if ( monthVal <= 9 ){
+                currDate = currDate + "/0" + monthVal;
+            }else{
+                currDate = currDate + "/" + monthVal;
+            }
+
+            if ( dayVal <= 9 ){
+                currDate = currDate + "/0" + dayVal;
+            }else {
+                currDate = currDate + "/" + dayVal;
+            }
+//            currDate = yearVal + "/" + monthVal + "/" + dayVal;
+            return currDate;
+        }
+        else{
+            dayVal = dayVal - situation;
+
+            currDate = String.valueOf( yearVal );
+
+            if ( monthVal <= 9 ){
+                currDate = currDate + "/0" + monthVal;
+            }else{
+                currDate = currDate + "/" + monthVal;
+            }
+
+            if ( dayVal <= 9 ){
+                currDate = currDate + "/0" + dayVal;
+            }else {
+                currDate = currDate + "/" + dayVal;
+            }
+//            currDate = yearVal + "/" + monthVal + "/" + dayVal;
+            return currDate;
+        }
+        // Do Greater than...
+    }
+
 
     /*
         // TODO : List...

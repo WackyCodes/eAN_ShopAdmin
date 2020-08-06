@@ -94,6 +94,7 @@ public class StaticValues {
     public static final int REQUEST_TO_VIEW_SERVICE_AREA = 9;
     public static final int REQUEST_TO_VIEW_FAVORITE_CUST = 10;
     public static final int REQUEST_TO_NOTIFY_NEW_ORDER = 11;
+    public static final int REQUEST_TO_NOTIFICATION = 12;
 
     // Fragment Code And Activity Code..
     public static final int FRAGMENT_HOME = 0;
