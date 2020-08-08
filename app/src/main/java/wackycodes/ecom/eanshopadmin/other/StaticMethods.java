@@ -257,19 +257,18 @@ public class StaticMethods {
         String timing =  "on " + dateData;
         try
         {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd wa HH:mm:ss");
+            SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd wa HH:mm");
             Date past = format.parse(dateData + " wa " + timeData );
             Date now = new Date();
-            long seconds= TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+//            long seconds= TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
             long minutes=TimeUnit.MILLISECONDS.toMinutes(now.getTime() - past.getTime());
             long hours=TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
             long days=TimeUnit.MILLISECONDS.toDays(now.getTime() - past.getTime());
 
 //          System.out.println(TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime()) + " milliseconds ago");
 
-            if(seconds<60)
+            if(minutes<=1)
             {
-//                System.out.println(seconds+" seconds ago");
                 timing = "Just now";
             }
             else if(minutes<60)

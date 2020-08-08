@@ -135,8 +135,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             DBQuery.getHomeCatListQuery( MainActivity.this, null, null, "HOME", 0  );
         }
 
-        // New Orders Loading...
-        DBQuery.getNewOrderQuery(this);
+
+        // Call new Order List Data...
+        DBQuery.loadNewOrderListData( this );
+
     }
 
     @Override

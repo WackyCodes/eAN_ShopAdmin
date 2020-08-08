@@ -71,17 +71,16 @@
 
             <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="28dp"
                 android:layout_marginLeft="6dp"
-                android:background="@drawable/back_rectangle_4dp_layout"
-                android:padding="2dp">
+                android:background="@drawable/back_rectangle_4dp_layout">
 
                 <Spinner
                     android:id="@+id/order_from_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textAlignment="center" />
+                    android:gravity="center_vertical"
+                    android:backgroundTint="@color/colorPrimary"/>
             </RelativeLayout>
 
             <!-- Total Orders -->
@@ -89,7 +88,6 @@
                 android:id="@+id/total_item_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:text="(2)"
                 android:textColor="@color/colorPrimary" />

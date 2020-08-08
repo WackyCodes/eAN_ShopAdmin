@@ -2,6 +2,7 @@ package wackycodes.ecom.eanshopadmin.main;
 
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.database.DBQuery;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_ADD_SHOP;
@@ -61,7 +63,6 @@ public class MainFragment extends Fragment {
         MainFragmentAdaptor mainFragmentAdaptor = new MainFragmentAdaptor();
         homeGridView.setAdapter( mainFragmentAdaptor );
         mainFragmentAdaptor.notifyDataSetChanged();
-
 
 
         return view;

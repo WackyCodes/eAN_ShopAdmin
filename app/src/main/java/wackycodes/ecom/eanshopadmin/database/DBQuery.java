@@ -477,6 +477,7 @@ public class DBQuery {
 
     }
 
+    // ------------------------  New Order Query ----------------------------
     // Get New Order List...
     public static ListenerRegistration newOrderNotificationLR;
     public static void getNewOrderQuery(final Context context){
@@ -580,7 +581,6 @@ public class DBQuery {
 
 
     }
-
     // Get Preparing & Ready To Delivered Order List...
     public static void getAcceptedOrderList( final int getListType ){
 
@@ -675,13 +675,9 @@ public class DBQuery {
                     }
                 } );
     }
+    // ------------------------  New Order Query ----------------------------
 
-    // Get Ready To Delivered List...
-    public static void getPackedOrderList(){
-
-    }
-
-    // Update Order Status on the database..
+    //  Update Order Status on the database.. ------------------------
     public static void updateOrderStatus(@Nullable final Dialog dialog, final OrderListModel orderListModel, final Map<String, Object> updateMap){
         getShopCollectionRef( "ORDERS" )
                 .document( orderListModel.getOrderID() )
@@ -694,14 +690,16 @@ public class DBQuery {
                             String statusCode = updateMap.get( "delivery_status" ).toString();
                             if (statusCode.toUpperCase().equals( "ACCEPTED" )){ // Preparing...
                                 preparingOrderList.add( orderListModel );
+                                if (NewOrderFragment.newOrderTabAdaptor != null)
+                                    NewOrderFragment.newOrderTabAdaptor.preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                             } else  if (statusCode.toUpperCase().equals( "PACKED" )){ // Ready to Delivery...
                                 readyToDeliveredList.add( orderListModel );
+                                if (NewOrderFragment.newOrderTabAdaptor != null)
+                                    NewOrderFragment.newOrderTabAdaptor.readyToDeliverFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                             } else  if (statusCode.toUpperCase().equals( "PROCESS" )){ // Out For Delivery...
 //                                readyToDeliveredList.remove( orderListModel );
                                 // By Default Done...
                             }
-                            if (NewOrderFragment.newOrderTabAdaptor != null)
-                                NewOrderFragment.newOrderTabAdaptor.notifyDataSetChanged();
 
                         }else{
                             // Failed...
@@ -724,7 +722,7 @@ public class DBQuery {
      *
      */
 
-    // Send Notification to User....
+    // Send Notification to User.... ------------------------
     public static void sentNotificationToUser( @NonNull String userUID, Map<String, Object> notifyMap ){
 
         String notify_id = notifyMap.get( "notify_id" ).toString();
@@ -743,7 +741,7 @@ public class DBQuery {
 
     }
 
-    // Query to Delivery Boy...
+    // Query to Delivery Boy...  ------------------------
     public static void setDeliveryDocument(@Nullable final Dialog dialog, Map<String, Object> deliveryMap, final OrderListModel orderListModel ){
 
         firebaseFirestore.collection( "DELIVERY" )
@@ -793,5 +791,21 @@ public class DBQuery {
                 } );
     }
 
+    // ------------------------  Call All List of New Order Query ----------------------------
+    // Load New Order List Data....
+    public static void loadNewOrderListData(Context context){
+        // New Orders Loading...
+        if (newOrderList.size() == 0){
+            getNewOrderQuery(context);
+        }
+        // Load Preparing Orders...
+        if (preparingOrderList.size() == 0){
+            getAcceptedOrderList( ORDER_LIST_PREPARING );
+        }
+        // Load Ready To Delivery Orders...
+        if ( readyToDeliveredList.size() == 0){
+            getAcceptedOrderList( ORDER_LIST_READY_TO_DELIVER );
+        }
+    }
 
 }

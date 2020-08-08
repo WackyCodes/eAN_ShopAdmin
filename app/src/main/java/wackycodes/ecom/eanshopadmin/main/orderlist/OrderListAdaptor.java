@@ -145,11 +145,11 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             Glide.with( itemView.getContext() ).load( pImage )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
 
-            orderId.setText( orderID );
+            orderId.setText( "Order ID : " + orderID );
             productName.setText( pName );
             orderItemsAmount.setText( "Rs." + oItemsAmounts +"/-" );
             orderStatus.setText( oStatus );
-            orderTime.setText( "Order " + oTime );
+            orderTime.setText( "Order " + StaticMethods.getTimeFromNow( oDate, oTime ) );
             totalItems.setText( String.valueOf( oTotalItems ) );
 
             itemView.setOnClickListener( new View.OnClickListener() {

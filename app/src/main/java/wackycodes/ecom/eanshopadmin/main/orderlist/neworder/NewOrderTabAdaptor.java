@@ -24,13 +24,13 @@ import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_READY_T
  */
 public class NewOrderTabAdaptor extends FragmentPagerAdapter {
     // New Order Fragment...
-    public static OrderViewPagerFragment newOrderFragment;
-    private  OrderViewPagerFragment preparingFragment;
-    private OrderViewPagerFragment readyToDeliverFragment;
+    private OrderViewPagerFragment newOrderFragment;
+    public OrderViewPagerFragment preparingFragment;
+    public OrderViewPagerFragment readyToDeliverFragment;
 
     private int totalTabs;
 
-    public NewOrderTabAdaptor(@NonNull FragmentManager fm, int totalTabs ) {
+    NewOrderTabAdaptor(@NonNull FragmentManager fm, int totalTabs) {
         super( fm );
         this.totalTabs = totalTabs;
     }
