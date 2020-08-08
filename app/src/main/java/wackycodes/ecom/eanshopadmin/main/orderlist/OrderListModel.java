@@ -43,13 +43,14 @@ public class OrderListModel {
     private String deliverySchedule;
 
     // Delivery Info and Address...
+    private String deliveryID; // new
     private String deliveredDate;
     private String deliveredDay;
     private String deliveredTime;
     private String deliveredByAuthID;
     private String deliveredByName;
     private String deliveredByMobile;
-
+    private String outForDeliveryOTP; // new
 
     //  Order Item List...
     private List<OrderProductItemModel> orderProductItemsList;
@@ -185,6 +186,14 @@ public class OrderListModel {
         this.deliverySchedule = deliverySchedule;
     }
 
+    public String getDeliveryID() {
+        return deliveryID;
+    }
+
+    public void setDeliveryID(String deliveryID) {
+        this.deliveryID = deliveryID;
+    }
+
     public String getDeliveredDate() {
         return deliveredDate;
     }
@@ -241,6 +250,14 @@ public class OrderListModel {
         this.orderProductItemsList = orderProductItemsList;
     }
 
+    public String getOutForDeliveryOTP() {
+        return outForDeliveryOTP;
+    }
+
+    public void setOutForDeliveryOTP(String outForDeliveryOTP) {
+        this.outForDeliveryOTP = outForDeliveryOTP;
+    }
+
     /*
 
      Map <String, Object> orderDetailMap = new HashMap <>();
@@ -281,6 +298,7 @@ public class OrderListModel {
         }
 
         // Put Delivery Info and Address..
+//        orderDetailMap.put( "delivery_id", "" );
 //        orderDetailMap.put( "delivery_date", "" );
 //        orderDetailMap.put( "delivery_day", "" );
 //        orderDetailMap.put( "delivery_time", "" );

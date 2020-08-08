@@ -8,6 +8,7 @@ public class StaticValues {
 
 
     public static String APP_VERSION = "em-1-01"; // ev-1-01
+    public static final String CHANNEL_ID = "e_an_shop_admin";
 
     public static final String DEFAULT_CITY_NAME = "BHOPAL";
     public static String CURRENT_CITY_NAME = "BHOPAL";

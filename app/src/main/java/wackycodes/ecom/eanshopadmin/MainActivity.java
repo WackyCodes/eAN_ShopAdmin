@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             DBQuery.getHomeCatListQuery( MainActivity.this, null, null, "HOME", 0  );
         }
 
+        // New Orders Loading...
+        DBQuery.getNewOrderQuery(this);
     }
 
     @Override
@@ -142,10 +144,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         // Notification Loading...
 //        AdminQuery.loadNotificationsQuery( this );
-
-        // New Orders Loading...
-        DBQuery.getNewOrderQuery(this);
-
     }
 
     // --------  Menu And Navigation....

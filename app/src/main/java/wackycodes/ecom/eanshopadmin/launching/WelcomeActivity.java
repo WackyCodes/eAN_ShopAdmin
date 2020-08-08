@@ -6,9 +6,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -28,6 +31,7 @@ import static wackycodes.ecom.eanshopadmin.database.DBQuery.currentUser;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseAuth;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.firebaseFirestore;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.CHANNEL_ID;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_CODE;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.CURRENT_CITY_NAME;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
@@ -209,7 +213,6 @@ public class WelcomeActivity extends AppCompatActivity {
             }
         }
     }
-
 
 
 

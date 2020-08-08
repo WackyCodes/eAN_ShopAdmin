@@ -56,7 +56,10 @@ public class SetFragmentActivity extends AppCompatActivity {
                 getSupportActionBar().setTitle( "Order List" );
                 break;
             case REQUEST_TO_NOTIFY_NEW_ORDER:
-                setFragment( new NewOrderFragment() );
+                if (NewOrderFragment.newOrderFragment == null){
+                    NewOrderFragment.newOrderFragment = new NewOrderFragment();
+                }
+                setFragment( NewOrderFragment.newOrderFragment );
                 getSupportActionBar().setTitle( "New Orders" );
                 break;
             case REQUEST_TO_VIEW_INCOME_RECORDS:

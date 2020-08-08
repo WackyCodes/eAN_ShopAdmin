@@ -32,6 +32,7 @@ public class AdminDataModel {
     private String shopAreaCode;
     private String shopAreaName;
     private String shopCity;
+    private String shopCityCode;
     private String shopLandMark;
 
     private String[] shopDaysSchedule;
@@ -257,6 +258,14 @@ public class AdminDataModel {
 
     public void setShopCity(String shopCity) {
         this.shopCity = shopCity;
+    }
+
+    public String getShopCityCode() {
+        return shopCityCode;
+    }
+
+    public void setShopCityCode(String shopCityCode) {
+        this.shopCityCode = shopCityCode;
     }
 
     public String getShopLandMark() {

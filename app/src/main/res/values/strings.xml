@@ -23,6 +23,10 @@
     <string name="back"><![CDATA[<< Back]]></string>
     <string name="out_for_delivery"><![CDATA[OUT FOR DELIVERY >]]></string>
 
+<!--    Notification Channel -->
+    <string name="channel_name">eAN Shop Admin</string>
+    <string name="channel_description">eAN Shop Admin</string>
+
     <string-array name="banner_type">
         <item>Banner Type</item>
         <item>Product Ad</item>

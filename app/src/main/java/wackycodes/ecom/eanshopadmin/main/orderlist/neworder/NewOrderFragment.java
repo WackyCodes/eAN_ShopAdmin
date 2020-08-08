@@ -28,6 +28,9 @@ import wackycodes.ecom.eanshopadmin.product.productview.ProductDetailsDescriptio
 
 public class NewOrderFragment extends Fragment {
 
+    public static Fragment newOrderFragment;
+    public static NewOrderTabAdaptor newOrderTabAdaptor;
+
     public NewOrderFragment() {
         // Required empty public constructor
     }
@@ -65,8 +68,9 @@ public class NewOrderFragment extends Fragment {
             }
         } );
 
-        NewOrderTabAdaptor newOrderTabAdaptor
-                                    = new NewOrderTabAdaptor( getActivity().getSupportFragmentManager(), newOrderTabLayoutIndicator.getTabCount() );
+        newOrderTabAdaptor
+                = new NewOrderTabAdaptor( getActivity().getSupportFragmentManager(), newOrderTabLayoutIndicator.getTabCount() );
+
         newOrderViewPager.setAdapter( newOrderTabAdaptor );
         newOrderTabAdaptor.notifyDataSetChanged();
 

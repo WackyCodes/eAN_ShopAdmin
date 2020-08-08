@@ -116,13 +116,6 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
               onBackPressed();
         }else if (view == addNewCatDoneBtn){
             if ( tempCatURI != null){
-                if (dialog != null){
-                    dialog.show();
-                }else{
-                    dialog = DialogsClass.getDialog( this );
-                    dialog.show();
-                }
-
                 String name = homeCatListModelList.get( catLocalIndex ).getHomeListModelList().get( layoutIndex )
                         .getBannerModelList().get( catIDNo ).getClickID();
                 uploadImageOnFirebaseStorage( this, tempCatURI, addNewCatImage, uploadPath, name  );
@@ -238,6 +231,7 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
 
     private void uploadImageOnFirebaseStorage(final Context context, final Uri imageUri,
                                                     final ImageView imageView, final String uploadPath, String fileName){
+        dialog.show();
         if (imageUri != null){
             final StorageReference storageRef = storageReference.child( uploadPath + "/" + fileName + ".jpg" );
 

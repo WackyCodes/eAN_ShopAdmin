@@ -6,24 +6,14 @@ package wackycodes.ecom.eanshopadmin.main.orderlist.neworder;
  * https://linktr.ee/wackycodes
  */
 
-import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListAdaptor;
-import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListModel;
-import wackycodes.ecom.eanshopadmin.product.description.ProductDetailsDescriptionFragment;
-
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.newOrderList;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.preparingOrderList;
 import static wackycodes.ecom.eanshopadmin.database.DBQuery.readyToDeliveredList;
-import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_CHECK;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_PREPARING;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_READY_TO_DELIVER;
@@ -58,7 +48,6 @@ public class NewOrderTabAdaptor extends FragmentPagerAdapter {
                 if (newOrderFragment.orderViewPagerListAdaptor!=null){
                     newOrderFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
-
                 return newOrderFragment;
             case 1:
                 if (preparingFragment == null){
@@ -67,21 +56,7 @@ public class NewOrderTabAdaptor extends FragmentPagerAdapter {
                 if (preparingFragment.orderViewPagerListAdaptor!=null){
                     preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
-
                 return preparingFragment;
-                // Case for Preparing Order List... ORDER_LIST_PREPARING
-//                if (preparingFragment == null){
-//                    preparingFragment = new OrderViewPagerFragment();
-//                }
-//                preparingFragment.orderViewPagerListAdaptor = new OrderListAdaptor( preparingOrderList, ORDER_LIST_PREPARING );
-//                preparingFragment.orderViewPagerRecyclerView.setAdapter( preparingFragment.orderViewPagerListAdaptor );
-//                preparingFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
-//                if (preparingOrderList.size() == 0){
-//                    preparingFragment.noOrderText.setVisibility( View.VISIBLE );
-//                }else{
-//                    preparingFragment.noOrderText.setVisibility( View.GONE );
-//                }
-//                return preparingFragment;
             case 2:
                 if (readyToDeliverFragment == null){
                     readyToDeliverFragment = new OrderViewPagerFragment(readyToDeliveredList, ORDER_LIST_READY_TO_DELIVER );
@@ -89,7 +64,6 @@ public class NewOrderTabAdaptor extends FragmentPagerAdapter {
                 if (readyToDeliverFragment.orderViewPagerListAdaptor!=null){
                     readyToDeliverFragment.orderViewPagerListAdaptor.notifyDataSetChanged();
                 }
-
                 return readyToDeliverFragment;
                 // Case for Ready to delivery Order List... ORDER_LIST_READY_TO_DELIVER
 //                if (readyToDeliverFragment == null){
@@ -125,4 +99,5 @@ public class NewOrderTabAdaptor extends FragmentPagerAdapter {
      *          8. PENDING - when Payment is Pending...
      *
      */
+
 }

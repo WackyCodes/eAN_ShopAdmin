@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,7 +28,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.MainActivity;
 import wackycodes.ecom.eanshopadmin.admin.notification.NotificationModel;
@@ -38,6 +41,7 @@ import wackycodes.ecom.eanshopadmin.home.HomePageAdaptor;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListFragment;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderListModel;
 import wackycodes.ecom.eanshopadmin.main.orderlist.OrderProductItemModel;
+import wackycodes.ecom.eanshopadmin.main.orderlist.neworder.NewOrderFragment;
 import wackycodes.ecom.eanshopadmin.model.BannerModel;
 import wackycodes.ecom.eanshopadmin.other.DialogsClass;
 import wackycodes.ecom.eanshopadmin.other.StaticMethods;
@@ -49,6 +53,9 @@ import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.GRID_PRODUCTS_LAYOUT_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.HORIZONTAL_PRODUCTS_LAYOUT_CONTAINER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_NEW_ORDER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_PREPARING;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_READY_TO_DELIVER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.REQUEST_TO_NOTIFY_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_BANNER_SLIDER_CONTAINER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_HOME_CAT_LIST_CONTAINER;
@@ -101,6 +108,9 @@ public class DBQuery {
     public static List <OrderListModel> preparingOrderList = new ArrayList <>();
     public static List <OrderListModel> readyToDeliveredList = new ArrayList <>();
 
+    // yyyyMMddHHmmss
+    private static final String fromIndex = StaticMethods.getDateUnder31(2).replace( "/", "" ).trim() + "000000";
+
 
      private static CollectionReference getShopCollectionRef(String collectionName){
          return firebaseFirestore.collection( "SHOPS" ).document( SHOP_ID ).collection( collectionName );
@@ -152,6 +162,7 @@ public class DBQuery {
 
                     // shop_categories
 
+                    String shop_city_code = documentSnapshot.get( "shop_city_code" ).toString();
                     String shop_city_name = documentSnapshot.get( "shop_city_name" ).toString();
 //                    String shop_close_msg = documentSnapshot.get( "shop_close_msg" ).toString();
 //                    String shop_id = documentSnapshot.get( "shop_id" ).toString();
@@ -187,6 +198,7 @@ public class DBQuery {
                     ADMIN_DATA_MODEL.setShopAreaCode( shop_area_code );
                     ADMIN_DATA_MODEL.setShopCategory( shop_category_name );
                     ADMIN_DATA_MODEL.setShopCity( shop_city_name );
+                    ADMIN_DATA_MODEL.setShopCityCode( shop_city_code );
 //                    shopHomeActivityModel.setShopCloseTime( shop_close_msg );
                     ADMIN_DATA_MODEL.setShopLandMark( shop_landmark );
                     ADMIN_DATA_MODEL.setShopLogo( shop_logo );
@@ -379,14 +391,18 @@ public class DBQuery {
     public static void getOrderListQuery(@Nullable final Dialog dialog, String fromDate){
 
         getShopCollectionRef( "ORDERS" )
-                .orderBy( "order_date" )
-                .whereGreaterThanOrEqualTo( "order_date", fromDate )
+                .orderBy( "index", Query.Direction.DESCENDING )
+                .whereGreaterThanOrEqualTo( "index", fromDate )
+//                .orderBy( "order_date" )
+//                .whereGreaterThanOrEqualTo( "order_date", fromDate )
                 .get()
                 .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task <QuerySnapshot> task) {
                         // Task...
-                        if (task.isSuccessful() && task.getResult() != null){
+                        if (task.isSuccessful()){ // && task.getResult() != null
+                            // Clear All Order from List...
+                            orderListModelList.clear();
                             for ( DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
                                 // Assign new OrderListModel...
                                 orderListModel = new OrderListModel();
@@ -396,7 +412,10 @@ public class DBQuery {
                                 orderListModel.setPayMode( documentSnapshot.get( "pay_mode" ).toString() );
 
                                 orderListModel.setDeliveryCharge( documentSnapshot.get( "delivery_charge" ).toString() );
+                                // billing_amounts
                                 orderListModel.setBillingAmounts( documentSnapshot.get( "billing_amounts" ).toString() );
+                                // total_amounts
+                                orderListModel.setProductAmounts( documentSnapshot.get( "total_amounts" ).toString() );
 
                                 orderListModel.setCustAuthID( documentSnapshot.get( "order_by_auth_id" ).toString() );
                                 orderListModel.setCustName( documentSnapshot.get( "order_by_name" ).toString() );
@@ -440,6 +459,12 @@ public class DBQuery {
                                     dialog.dismiss();
                                 }
                             }
+                            if (orderListModelList.size() == 0){
+                                OrderListFragment.no_order_text.setVisibility( View.VISIBLE );
+                                OrderListFragment.no_order_text.setText( "No Order Found!" );
+                            }else{
+                                OrderListFragment.no_order_text.setVisibility( View.GONE );
+                            }
 
                         }else{
                             // Failed...
@@ -452,10 +477,9 @@ public class DBQuery {
 
     }
 
+    // Get New Order List...
     public static ListenerRegistration newOrderNotificationLR;
     public static void getNewOrderQuery(final Context context){
-        // yyyyMMddHHmmss
-       final String fromIndex = StaticMethods.getDateUnder31(2).replace( "/", "" ).trim() + "000000";
 
 //       showToast(context, fromIndex);
 
@@ -480,7 +504,10 @@ public class DBQuery {
                                     orderListModel.setPayMode( documentSnapshot.get( "pay_mode" ).toString() );
 
                                     orderListModel.setDeliveryCharge( documentSnapshot.get( "delivery_charge" ).toString() );
+                                    // billing_amounts
                                     orderListModel.setBillingAmounts( documentSnapshot.get( "billing_amounts" ).toString() );
+                                    // total_amounts
+                                    orderListModel.setProductAmounts( documentSnapshot.get( "total_amounts" ).toString() );
 
                                     orderListModel.setCustAuthID( documentSnapshot.get( "order_by_auth_id" ).toString() );
                                     orderListModel.setCustName( documentSnapshot.get( "order_by_name" ).toString() );
@@ -514,7 +541,19 @@ public class DBQuery {
 
 //                                    newOrderList.add( orderListModel );
                                     // add Model in the new Order List...
-                                    if (!newOrderList.contains( orderListModel )){
+//                                    if (!newOrderList.contains( orderListModel )){
+//                                        newOrderList.add( orderListModel );
+//                                        cartCount++;
+//                                    }
+                                    boolean isExist = false;
+                                    for (OrderListModel tempModel : newOrderList){
+                                        if (tempModel.getOrderID().equals( orderListModel.getOrderID() )){
+                                            isExist = true;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!isExist){
                                         newOrderList.add( orderListModel );
                                         cartCount++;
                                     }
@@ -540,6 +579,218 @@ public class DBQuery {
                 } );
 
 
+    }
+
+    // Get Preparing & Ready To Delivered Order List...
+    public static void getAcceptedOrderList( final int getListType ){
+
+//        case ORDER_LIST_NEW_ORDER:
+//        case ORDER_LIST_PREPARING:
+//        case ORDER_LIST_READY_TO_DELIVER:
+
+        getShopCollectionRef( "ORDERS" )
+                .orderBy( "index", Query.Direction.DESCENDING )
+                .whereGreaterThanOrEqualTo( "index", fromIndex )
+//                .limit(  ) //order_time. order_date
+                .addSnapshotListener( new EventListener <QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (queryDocumentSnapshots != null ) {
+                            OrderListModel orderListModel;
+                            String deliveryStatus = null;
+                            if (getListType == ORDER_LIST_PREPARING){
+                                preparingOrderList.clear();
+                                deliveryStatus = "ACCEPTED";
+                            }
+                            else if (getListType == ORDER_LIST_READY_TO_DELIVER){
+                                readyToDeliveredList.clear();
+                                deliveryStatus = "PACKED";
+                            }
+
+                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()){
+                                String delivery_status = documentSnapshot.get( "delivery_status" ).toString();
+                                if (delivery_status.toUpperCase().equals( deliveryStatus )){
+                                    // Assign new OrderListModel...
+                                    orderListModel = new OrderListModel();
+
+                                    orderListModel.setOrderID( documentSnapshot.get( "order_id" ).toString() );
+                                    orderListModel.setDeliveryStatus( documentSnapshot.get( "delivery_status" ).toString() );
+                                    orderListModel.setPayMode( documentSnapshot.get( "pay_mode" ).toString() );
+
+                                    orderListModel.setDeliveryCharge( documentSnapshot.get( "delivery_charge" ).toString() );
+                                    // billing_amounts
+                                    orderListModel.setBillingAmounts( documentSnapshot.get( "billing_amounts" ).toString() );
+                                    // total_amounts
+                                    orderListModel.setProductAmounts( documentSnapshot.get( "total_amounts" ).toString() );
+
+                                    orderListModel.setCustAuthID( documentSnapshot.get( "order_by_auth_id" ).toString() );
+                                    orderListModel.setCustName( documentSnapshot.get( "order_by_name" ).toString() );
+                                    orderListModel.setCustMobile( documentSnapshot.get( "order_by_mobile" ).toString() );
+
+                                    orderListModel.setShippingName( documentSnapshot.get( "order_accepted_by" ).toString() );
+                                    orderListModel.setShippingAddress( documentSnapshot.get( "order_delivery_address" ).toString() );
+                                    orderListModel.setShippingPinCode( documentSnapshot.get( "order_delivery_pin" ).toString() );
+
+                                    orderListModel.setOrderDate( documentSnapshot.get( "order_date" ).toString() );
+                                    orderListModel.setOrderDay( documentSnapshot.get( "order_day" ).toString() );
+                                    orderListModel.setOrderTime( documentSnapshot.get( "order_time" ).toString() );
+
+                                    orderListModel.setDeliverySchedule( documentSnapshot.get( "delivery_schedule_time" ).toString() );
+
+                                    if ( documentSnapshot.get( "delivery_id" ) != null){
+                                        orderListModel.setDeliveryID( documentSnapshot.get( "delivery_id" ).toString()  );
+                                    }else{
+                                        orderListModel.setDeliveryID( null );
+                                    }
+
+                                    long no_of_products = (long)documentSnapshot.get( "no_of_products" );
+
+                                    orderSubList = new ArrayList <>();
+
+                                    for (long ind = 0; ind < no_of_products; ind++){
+                                        orderSubList.add( new OrderProductItemModel(
+                                                documentSnapshot.get( "product_id_"+ind ).toString(),
+                                                documentSnapshot.get( "product_image_"+ind ).toString(),
+                                                documentSnapshot.get( "product_name_"+ind ).toString(),
+                                                documentSnapshot.get( "product_price_"+ind ).toString(),
+                                                documentSnapshot.get( "product_qty_"+ind ).toString()
+                                        ) );
+                                    }
+
+                                    orderListModel.setOrderProductItemsList( orderSubList );
+
+                                    // add Model in the new Order List...
+                                    if (getListType == ORDER_LIST_PREPARING){
+                                        preparingOrderList.add( orderListModel );
+                                    }
+                                    else if (getListType == ORDER_LIST_READY_TO_DELIVER){
+                                        readyToDeliveredList.add( orderListModel );
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+                } );
+    }
+
+    // Get Ready To Delivered List...
+    public static void getPackedOrderList(){
+
+    }
+
+    // Update Order Status on the database..
+    public static void updateOrderStatus(@Nullable final Dialog dialog, final OrderListModel orderListModel, final Map<String, Object> updateMap){
+        getShopCollectionRef( "ORDERS" )
+                .document( orderListModel.getOrderID() )
+                .update( updateMap )
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task <Void> task) {
+                        if (task.isSuccessful()){
+                            // TODO: Update in Local List...
+                            String statusCode = updateMap.get( "delivery_status" ).toString();
+                            if (statusCode.toUpperCase().equals( "ACCEPTED" )){ // Preparing...
+                                preparingOrderList.add( orderListModel );
+                            } else  if (statusCode.toUpperCase().equals( "PACKED" )){ // Ready to Delivery...
+                                readyToDeliveredList.add( orderListModel );
+                            } else  if (statusCode.toUpperCase().equals( "PROCESS" )){ // Out For Delivery...
+//                                readyToDeliveredList.remove( orderListModel );
+                                // By Default Done...
+                            }
+                            if (NewOrderFragment.newOrderTabAdaptor != null)
+                                NewOrderFragment.newOrderTabAdaptor.notifyDataSetChanged();
+
+                        }else{
+                            // Failed...
+                        }
+                        if ( dialog!= null ){
+                            dialog.dismiss();
+                        }
+                    }
+                } );
+    }
+    /**  Order Status
+     *          1. WAITING - ( For Accept )
+     *          2. ACCEPTED - ( Preparing )
+     *          3. PACKED - ( Waiting for Delivery ) READY_TO_DELIVERY
+     *          4. PROCESS  - ( On Delivery ) OUT_FOR_DELIVERY
+     *          5. SUCCESS - Success Full Delivered..!
+     *          6. CANCELLED -  When Order has been cancelled by user...
+     *          7. FAILED -  when PayMode Online and payment has been failed...
+     *          8. PENDING - when Payment is Pending...
+     *
+     */
+
+    // Send Notification to User....
+    public static void sentNotificationToUser( @NonNull String userUID, Map<String, Object> notifyMap ){
+
+        String notify_id = notifyMap.get( "notify_id" ).toString();
+        firebaseFirestore.collection( "USERS" )
+                .document( userUID )
+                .collection( "NOTIFICATIONS" )
+                .document( notify_id )
+                .set( notifyMap )
+                .addOnCompleteListener( new OnCompleteListener <Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task <Void> task) {
+                        // Success!
+                        // Cancel..!
+                    }
+                } );
+
+    }
+
+    // Query to Delivery Boy...
+    public static void setDeliveryDocument(@Nullable final Dialog dialog, Map<String, Object> deliveryMap, final OrderListModel orderListModel ){
+
+        firebaseFirestore.collection( "DELIVERY" )
+                .document( ADMIN_DATA_MODEL.getShopCityCode() )
+                .collection( "DELIVERY" )
+                .add( deliveryMap )
+                .addOnCompleteListener( new OnCompleteListener <DocumentReference>() {
+                    @Override
+                    public void onComplete(@NonNull Task <DocumentReference> task) {
+                        if (task.isSuccessful()){
+                           String deliveryID = task.getResult().getId();
+                            // Now we have to update Delivery Details in the Order Document...
+
+                            Map <String, Object> updateMap = new HashMap <>();
+                            updateMap.put( "delivery_status", "ACCEPTED" );
+                            updateMap.put( "delivery_id", deliveryID );
+                            orderListModel.setDeliveryID( deliveryID );
+                            DBQuery.updateOrderStatus( dialog, orderListModel ,updateMap );
+
+                        }else{
+
+                        }
+                    }
+                } );
+
+    }
+
+    //...
+    public void getDeliveryList(){
+        // To get New Delivery List...
+        firebaseFirestore.collection( "DELIVERY" )
+                .document( ADMIN_DATA_MODEL.getShopCity() )
+                .collection( "DELIVERY" )
+                .whereEqualTo( "SAMPOL", "SAMPOL" )
+                .get()
+                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
+//                                documentSnapshot.getId();
+                            }
+                        }else{
+
+                        }
+                    }
+                } );
     }
 
 

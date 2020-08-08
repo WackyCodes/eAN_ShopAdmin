@@ -155,20 +155,6 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/order_reject_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/back_rectangle_4dp_layout"
-                    android:elevation="2dp"
-                    android:textAlignment="center"
-                    android:layout_weight="1"
-                    android:layout_margin="2dp"
-                    android:padding="1dp"
-                    android:text=" Reject "
-                    android:textSize="10dp"
-                    android:textColor="@color/colorRed"
-                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/order_accept_text"
@@ -178,10 +164,9 @@
                     android:elevation="2dp"
                     android:textAlignment="center"
                     android:layout_weight="1"
-                    android:layout_margin="2dp"
                     android:padding="1dp"
-                    android:text=" Accept "
-                    android:textSize="10dp"
+                    android:text=" Accept Order "
+                    android:textSize="12dp"
                     android:textColor="@color/colorGreen"
                     android:textStyle="bold"/>
             </LinearLayout>
@@ -197,7 +182,7 @@
                 android:layout_margin="2dp"
                 android:padding="1dp"
                 android:text=" DONE "
-                android:textSize="10dp"
+                android:textSize="12dp"
                 android:textColor="@color/colorGreen"
                 android:textStyle="bold"/>
 
@@ -235,7 +220,7 @@
                     android:layout_margin="2dp"
                     android:padding="1dp"
                     android:text="@string/out_for_delivery"
-                    android:textSize="10dp"
+                    android:textSize="12dp"
                     android:textColor="@color/colorGreen"
                     android:textStyle="bold"/>
             </LinearLayout>

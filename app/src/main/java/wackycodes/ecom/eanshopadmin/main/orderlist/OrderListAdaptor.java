@@ -6,6 +6,7 @@ package wackycodes.ecom.eanshopadmin.main.orderlist;
  * https://linktr.ee/wackycodes
  */
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +20,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import wackycodes.ecom.eanshopadmin.R;
+import wackycodes.ecom.eanshopadmin.database.DBQuery;
+import wackycodes.ecom.eanshopadmin.other.StaticMethods;
 
 import static wackycodes.ecom.eanshopadmin.other.StaticMethods.showToast;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.ADMIN_DATA_MODEL;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_CHECK;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_NEW_ORDER;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_PREPARING;
 import static wackycodes.ecom.eanshopadmin.other.StaticValues.ORDER_LIST_READY_TO_DELIVER;
+import static wackycodes.ecom.eanshopadmin.other.StaticValues.SHOP_ID;
 
 /**
  * Created by Shailendra (WackyCodes) on 31/07/2020 21:21
@@ -38,6 +48,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
     private List <OrderListModel> orderListModelList;
     private int listType;
+//    private View fragmentView;
 
     public OrderListAdaptor(List <OrderListModel> orderListModelList, int listType) {
         this.orderListModelList = orderListModelList;
@@ -63,7 +74,6 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             default:
                 return null;
         }
-
     }
 
     @Override
@@ -86,7 +96,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             case ORDER_LIST_NEW_ORDER:
             case ORDER_LIST_PREPARING:
             case ORDER_LIST_READY_TO_DELIVER:
-                ((NewOrderListViewHolder)holder).setData( orderID, pName, oItemsAmounts, oStatus, oDate, oTime, oTotalItems, pImage );
+                ((NewOrderListViewHolder)holder).setData( orderID, pName, oItemsAmounts, oStatus, oDate, oTime, oTotalItems, pImage, position );
                 break;
             default:
                 break;
@@ -96,11 +106,9 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-//        if (orderListModelList.size() == 0){
-//            OrderListFragment.no_order_text.setVisibility( View.VISIBLE );
-//        }else{
-//            OrderListFragment.no_order_text.setVisibility( View.GONE );
-//        }
+        if ( listType == ORDER_LIST_CHECK ){
+            OrderListFragment.totalOrders.setText( "("+orderListModelList.size()+")" );
+        }
         return orderListModelList.size();
     }
 
@@ -165,7 +173,6 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
         private ImageView productImage;
         // New Order Action Layout...
         private LinearLayout newOrderActionLayout;
-        private TextView rejectOrderBtn;
         private TextView acceptOrderBtn;
         // Order Preparing Text Button...
         private TextView packingTextBtn;
@@ -186,7 +193,6 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             productImage = itemView.findViewById( R.id.product_image );
             // ---
             newOrderActionLayout = itemView.findViewById( R.id.new_order_action_layout );
-            rejectOrderBtn = itemView.findViewById( R.id.order_reject_text );
             acceptOrderBtn = itemView.findViewById( R.id.order_accept_text );
             // ------
             packingTextBtn = itemView.findViewById( R.id.preparing_packing_text_btn );
@@ -197,7 +203,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
         }
 
-        private void setData( String orderID, String pName, String oItemsAmounts, String oStatus,  String oDate, String oTime, int oTotalItems, String pImage ){
+        private void setData(String orderID, String pName, String oItemsAmounts, String oStatus, String oDate, String oTime, int oTotalItems, String pImage, final int index ){
 
             // Decide based On List Type...
             switch (listType){
@@ -224,7 +230,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             Glide.with( itemView.getContext() ).load( pImage )
                     .apply( new RequestOptions().placeholder( R.drawable.ic_photo_black_24dp ) ).into( productImage );
 
-            orderId.setText( orderID );
+            orderId.setText( "Order ID : " + orderID );
             productName.setText( pName );
             orderItemsAmount.setText( "Rs." + oItemsAmounts +"/-" );
             orderStatus.setText( oStatus );
@@ -238,10 +244,146 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
                 }
             } );
 
+            // Accept Order Action...
+            acceptOrderBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setAcceptOrderBtn( index );
+                }
+            } );
+            // Packing Order Action...
+            packingTextBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setPackingTextBtn( index );
+                }
+            } );
+            // Out For Delivery Action...
+            outForDeliveryBtn.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (TextUtils.isEmpty( outForDeliveryPinEt.getText().toString() )){
+                        outForDeliveryPinEt.setError( "Required!" );
+                    }else if(outForDeliveryPinEt.getText().toString().length() < 4){
+                        outForDeliveryPinEt.setError( "Wrong Pin!" );
+                    }else{
+                        setOutForDeliveryBtn(outForDeliveryPinEt.getText().toString(), index);
+                    }
+                }
+            } );
+
         }
 
+        private void setAcceptOrderBtn(int index){
+            // Create Map For Notify User...
+            Map <String, Object> notifyMap = new HashMap <>();
+            notifyMap.put( "index", StaticMethods.getRandomIndex() );
+            notifyMap.put( "notify_type", 1 );
+            notifyMap.put( "notify_id", StaticMethods.getFiveDigitRandom() );
+            notifyMap.put( "notify_click_id", orderListModelList.get( index ).getOrderID() );
+            notifyMap.put( "notify_image",  orderListModelList.get( index ).getOrderProductItemsList().get( 0 ).getProductImage() );
+            notifyMap.put( "notify_title", "Your Order preparing to pack" );
+            notifyMap.put( "notify_body",  orderListModelList.get( index ).getOrderProductItemsList().get( 0 ).getProductName() );
+            notifyMap.put( "notify_date", StaticMethods.getCrrDate() );
+            notifyMap.put( "notify_time", StaticMethods.getCrrTime() );
+            notifyMap.put( "notify_is_read", false );
+            // Notify User...
+            DBQuery.sentNotificationToUser(  orderListModelList.get( index ).getCustAuthID(), notifyMap );
+
+//           Query To Find Delivery Boy... After that Update On Order Document...
+            queryToDeliveryBoy(index);
+        }
+
+        private void setPackingTextBtn(int index){
+
+            Map <String, Object> updateMap = new HashMap <>();
+            updateMap.put( "delivery_status", "PACKED" );
+            DBQuery.updateOrderStatus( null, orderListModelList.get( index ) ,updateMap );
+
+            // Create Map For Notify User...
+            Map <String, Object> notifyMap = new HashMap <>();
+            notifyMap.put( "index", StaticMethods.getRandomIndex() );
+            notifyMap.put( "notify_type", 1 );
+            notifyMap.put( "notify_id", StaticMethods.getFiveDigitRandom() );
+            notifyMap.put( "notify_click_id", orderListModelList.get( index ).getOrderID() );
+            notifyMap.put( "notify_image",  orderListModelList.get( index ).getOrderProductItemsList().get( 0 ).getProductImage() );
+            notifyMap.put( "notify_title", "Your Order has been packed! Waiting for delivery..." );
+            notifyMap.put( "notify_body",  orderListModelList.get( index ).getOrderProductItemsList().get( 0 ).getProductName() );
+            notifyMap.put( "notify_date", StaticMethods.getCrrDate() );
+            notifyMap.put( "notify_time", StaticMethods.getCrrTime() );
+            notifyMap.put( "notify_is_read", false );
+            // Notify User...
+            DBQuery.sentNotificationToUser( orderListModelList.get( index ).getCustAuthID(), notifyMap );
+
+            orderListModelList.remove( index );
+            OrderListAdaptor.this.notifyDataSetChanged();
+
+        }
+
+        private void setOutForDeliveryBtn(String otpPin, int index){
+
+            getDeliveryOtp( orderListModelList.get( index ).getDeliveryID(), otpPin );
+
+        }
+
+        private void queryToDeliveryBoy(int index){
+            final String vOTP = StaticMethods.getOTPDigitRandom(); // 4 Digit...
+            orderListModelList.get( index ).setOutForDeliveryOTP( vOTP );
+
+            OrderListModel orderListModel = orderListModelList.get( index );
+
+            Map <String, Object> deliveryMap = new HashMap <>();
+            deliveryMap.put( "order_id", orderListModel.getOrderID() );
+            deliveryMap.put( "delivery_status", "ACCEPTED" );
+            deliveryMap.put( "verify_otp", vOTP );
+            deliveryMap.put( "accepted_date", StaticMethods.getCrrDate() );
+            deliveryMap.put( "accepted_time", StaticMethods.getCrrTime() );
+            deliveryMap.put( "shop_id", SHOP_ID );
+            deliveryMap.put( "shop_name", ADMIN_DATA_MODEL.getShopName() );
+            deliveryMap.put( "shop_logo", ADMIN_DATA_MODEL.getShopLogo() );
+            deliveryMap.put( "shop_address", ADMIN_DATA_MODEL.getShopAddress() );
+            deliveryMap.put( "shop_helpline", ADMIN_DATA_MODEL.getShopHelpLine() );
+            deliveryMap.put( "shop_pin", ADMIN_DATA_MODEL.getShopAreaCode() );
+            deliveryMap.put( "shipping_address", orderListModel.getShippingAddress() );
+            deliveryMap.put( "shipping_pin", orderListModel.getShippingPinCode() );
+
+            DBQuery.setDeliveryDocument( null, deliveryMap, orderListModelList.get( index ));
+
+            orderListModelList.remove( index );
+            OrderListAdaptor.this.notifyDataSetChanged();
+
+        }
+
+        private void getDeliveryOtp(String deliveryId, final String verifyOtp){
+            DBQuery.firebaseFirestore.collection( "DELIVERY" )
+                    .document( ADMIN_DATA_MODEL.getShopCityCode() )
+                    .collection( "DELIVERY" )
+                    .document( deliveryId )
+
+                    .get( ).addOnCompleteListener( new OnCompleteListener <DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task <DocumentSnapshot> task) {
+                            if (task.isSuccessful()){
+                                String otp = task.getResult().get( "verify_otp" ).toString();
+                                if (otp.equals( verifyOtp )){
+                                    // TODO: Out For Delivery...
+                                    showToast(  itemView.getContext(), "Otp Matched!" );
+
+                                }else{
+                                    outForDeliveryPinEt.setError( "Not Matched!" );
+                                }
+
+                            }else{
+
+                            }
+                        }
+                    } );
+
+        }
 
     }
 
 
 }
+
+

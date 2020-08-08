@@ -58,6 +58,11 @@ public class StaticMethods {
         return simpleDateFormat.format(new Date());
     }
 
+    public static String getCrrTime(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return simpleDateFormat.format(new Date());
+    }
+
     public static String getRandomNumAccordingToDate(){
         Date date =  Calendar.getInstance().getTime();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMddHHmmss", Locale.getDefault());
@@ -87,6 +92,23 @@ public class StaticMethods {
         }
 
         randNum = String.valueOf( rand_int1 ).substring( 0, 2 );
+
+        return randNum;
+    }
+
+    public static String getOTPDigitRandom(){
+        Random random = new Random();
+        // Generate random integers in range 0 to 9999
+        int rand_int1 = 0;
+        String randNum = "";
+        do {
+            rand_int1 = random.nextInt(10000);
+        }while ( rand_int1 <= 0 );
+
+        if (rand_int1<9999){
+            rand_int1 = rand_int1*100;
+        }
+        randNum = String.valueOf( rand_int1 ).substring( 0, 4 );
 
         return randNum;
     }
