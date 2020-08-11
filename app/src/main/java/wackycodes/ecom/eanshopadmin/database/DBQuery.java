@@ -582,7 +582,7 @@ public class DBQuery {
 
     }
     // Get Preparing & Ready To Delivered Order List...
-    public static void getAcceptedOrderList( final int getListType ){
+    private static void getAcceptedOrderList( final int getListType ){
 
 //        case ORDER_LIST_NEW_ORDER:
 //        case ORDER_LIST_PREPARING:
@@ -592,10 +592,11 @@ public class DBQuery {
                 .orderBy( "index", Query.Direction.DESCENDING )
                 .whereGreaterThanOrEqualTo( "index", fromIndex )
 //                .limit(  ) //order_time. order_date
-                .addSnapshotListener( new EventListener <QuerySnapshot>() {
+                .get()
+                .addOnCompleteListener( new OnCompleteListener <QuerySnapshot>() {
                     @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if (queryDocumentSnapshots != null ) {
+                    public void onComplete(@NonNull Task <QuerySnapshot> task) {
+                        if ( task.isSuccessful() ) {
                             OrderListModel orderListModel;
                             String deliveryStatus = null;
                             if (getListType == ORDER_LIST_PREPARING){
@@ -607,7 +608,7 @@ public class DBQuery {
                                 deliveryStatus = "PACKED";
                             }
 
-                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()){
+                            for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()){
                                 String delivery_status = documentSnapshot.get( "delivery_status" ).toString();
                                 if (delivery_status.toUpperCase().equals( deliveryStatus )){
                                     // Assign new OrderListModel...
@@ -759,6 +760,7 @@ public class DBQuery {
                             updateMap.put( "delivery_status", "ACCEPTED" );
                             updateMap.put( "delivery_id", deliveryID );
                             orderListModel.setDeliveryID( deliveryID );
+                            orderListModel.setDeliveryStatus( "ACCEPTED" );
                             DBQuery.updateOrderStatus( dialog, orderListModel ,updateMap );
 
                         }else{

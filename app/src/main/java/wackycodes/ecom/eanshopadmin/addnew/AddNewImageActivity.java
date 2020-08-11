@@ -216,6 +216,7 @@ public class AddNewImageActivity extends AppCompatActivity implements View.OnCli
                             if (HomeFragment.homePageAdaptor != null)
                                 HomeFragment.homePageAdaptor.notifyDataSetChanged();
                             showToast( AddNewImageActivity.this, "update successfully!" );
+                            dialog.dismiss();
                             finish();
                         }else{
                             dialog.dismiss();

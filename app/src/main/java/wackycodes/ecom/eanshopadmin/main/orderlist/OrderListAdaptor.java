@@ -149,7 +149,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             productName.setText( pName );
             orderItemsAmount.setText( "Rs." + oItemsAmounts +"/-" );
             orderStatus.setText( oStatus );
-            orderTime.setText( "Order " + StaticMethods.getTimeFromNow( oDate, oTime ) );
+            orderTime.setText( "Order " + StaticMethods.getTimeFromNow( oDate, oTime +":00" ) );
             totalItems.setText( String.valueOf( oTotalItems ) );
 
             itemView.setOnClickListener( new View.OnClickListener() {
@@ -234,7 +234,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
             productName.setText( pName );
             orderItemsAmount.setText( "Rs." + oItemsAmounts +"/-" );
             orderStatus.setText( oStatus );
-            orderTime.setText( "Order " + oTime );
+            orderTime.setText( "Order " + StaticMethods.getTimeFromNow( oDate, oTime +":00" ) );
             totalItems.setText( String.valueOf( oTotalItems ) );
 
             itemView.setOnClickListener( new View.OnClickListener() {
@@ -298,6 +298,7 @@ public class OrderListAdaptor extends RecyclerView.Adapter {
 
             Map <String, Object> updateMap = new HashMap <>();
             updateMap.put( "delivery_status", "PACKED" );
+            orderListModelList.get( index ).setDeliveryStatus( "PACKED" );
             DBQuery.updateOrderStatus( null, orderListModelList.get( index ) ,updateMap );
 
             // Create Map For Notify User...

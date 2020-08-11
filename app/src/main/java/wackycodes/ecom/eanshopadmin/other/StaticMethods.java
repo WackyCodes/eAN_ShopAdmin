@@ -223,7 +223,6 @@ public class StaticMethods {
         }
     }
 
-
     public static String readFileFromLocal( Context context, String fileName ){
         String msg = null;
         try {
@@ -257,19 +256,34 @@ public class StaticMethods {
         String timing =  "on " + dateData;
         try
         {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd wa HH:mm");
-            Date past = format.parse(dateData + " wa " + timeData );
-            Date now = new Date();
+            SimpleDateFormat format = new SimpleDateFormat( "yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+//            format.applyPattern( "yyyy/MM/ddXHH:mm:ss" );
+            Date past = format.parse(dateData + " " + timeData );
+            Date now = format.parse( format.format( new Date() ) );
+            long diff = now.getTime() - past.getTime();
+            /*
+            1000 milliseconds = 1 second
+            60 seconds = 1 minute
+            60 minutes = 1 hour
+            24 hours = 1 day
+             */
+            long seconds = diff / 1000;
+            long minutes = diff / (60 * 1000);
+            long hours = diff / (60 * 60 * 1000);
+            long days = diff / (24 * 60 * 60 * 1000);
+
 //            long seconds= TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
-            long minutes=TimeUnit.MILLISECONDS.toMinutes(now.getTime() - past.getTime());
-            long hours=TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
-            long days=TimeUnit.MILLISECONDS.toDays(now.getTime() - past.getTime());
+//            long minutes=TimeUnit.MILLISECONDS.toMinutes(now.getTime() - past.getTime());
+//            long hours=TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
+//            long days=TimeUnit.MILLISECONDS.toDays(now.getTime() - past.getTime());
 
-//          System.out.println(TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime()) + " milliseconds ago");
-
-            if(minutes<=1)
+            if(seconds<=1)
             {
                 timing = "Just now";
+            }
+            else if(seconds<60)
+            {
+                timing = seconds + " sec ago";
             }
             else if(minutes<60)
             {
@@ -277,20 +291,19 @@ public class StaticMethods {
             }
             else if(hours<24)
             {
-                timing = hours + " Min ago";
+                timing = hours + " hr ago";
             }
             else if (days < 8)
             {
-                timing = days + " Min ago";
+                timing = days + " days ago";
             }
         }
         catch (Exception j){
             j.printStackTrace();
-        }finally {
+        } finally {
             return timing;
         }
     }
-
 
     public static String getDateUnder31( int situation)
     {
